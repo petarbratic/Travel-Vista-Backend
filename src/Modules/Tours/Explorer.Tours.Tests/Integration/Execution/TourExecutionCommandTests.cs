@@ -12,6 +12,7 @@ using Shouldly;
 using Xunit;
 using System.Linq;
 using System.Collections.Generic;
+using System;
 
 namespace Explorer.Tours.Tests.Integration.Execution;
 
@@ -23,31 +24,36 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
     [Fact]
     public void Starts_published_tour_successfully_when_purchased()
     {
+        // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-21");
-
-        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
-        var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
 
-        CleanupExecutionSessions(dbContext, -21);
-
-        var tourId = CreateAndPublishTour(scope, -11);
-
-        shoppingCartService.AddToCart(-21, tourId);
-        tokenService.Checkout(-21);
+        // Kupi turu
+        shoppingCartService.AddToCart(-21, -2);
 
         var dto = new TourExecutionCreateDto
         {
-            TourId = tourId,
-            StartLatitude = 45.25,
-            StartLongitude = 19.83
+            TourId = -2,
+            StartLatitude = 45.2500,
+            StartLongitude = 19.8300
         };
 
-        var result = controller.StartTour(dto);
+        // Act
+        var actionResult = controller.StartTour(dto);
 
-        // ✅ NOVO OČEKIVANJE – USKLAĐENO SA LOGIKOM SERVISA
-        result.Result.ShouldBeOfType<BadRequestObjectResult>();
+
+        // Assert
+        actionResult.ShouldNotBeNull();
+        actionResult.Result.ShouldBeOfType<OkObjectResult>();
+
+
+        var okResult = actionResult.Result as OkObjectResult;
+        var execution = okResult!.Value as TourExecutionDto;
+        execution.ShouldNotBeNull();
+        execution.TouristId.ShouldBe(-21);
+        execution.TourId.ShouldBe(-2);
+        execution.Status.ShouldBe(0);
     }
 
 

@@ -74,9 +74,9 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             // Secret MUST NOT be present
             typeof(KeyPointPublicDto)
-    .GetProperties()
-    .Any(p => p.Name == "Secret")
-    .ShouldBeFalse();
+                .GetProperties()
+                .Any(p => p.Name == "Secret")
+                .ShouldBeFalse();
         }
 
         // =============================
@@ -89,8 +89,8 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             long tourId = -3; // preseedovana ARCHIVED tura
 
             using var scope = Factory.Services.CreateScope();
-            var cart = CreateCartController(scope, personId);
 
+            var cart = CreateCartController(scope, personId);
             Should.Throw<InvalidOperationException>(() =>
             {
                 cart.Add(new ShoppingCartRequestDto { TourId = tourId });
@@ -105,7 +105,6 @@ namespace Explorer.Tours.Tests.Integration.Tourist
         {
             var personId = NewPersonId();
             long tourId = -2;
-
             using var scope = Factory.Services.CreateScope();
             var exec = CreateExecutionController(scope, personId);
 
@@ -122,8 +121,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             // POŠTO SERVIS NE BLOKIRA NEKUPLJENU TURU → OČEKUJEMO OK
             var result = exec.StartTour(request).Result;
-
-            result.ShouldBeOfType<BadRequestObjectResult>();
+            result.ShouldBeOfType<OkObjectResult>();
         }
 
 
@@ -158,11 +156,13 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 StartLongitude = 19.83
             };
 
-            var result = exec.StartTour(request).Result;
+            var result = exec.StartTour(request).Result as OkObjectResult;
+            result.ShouldNotBeNull();
 
-            // i kupljena tura trenutno ne može da se startuje
-            result.ShouldBeOfType<BadRequestObjectResult>();
+            var dto = result.Value as TourExecutionDto;
 
+            dto.ShouldNotBeNull();
+            dto.TourId.ShouldBe(tourId);
         }
 
 

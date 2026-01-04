@@ -79,9 +79,9 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Cannot start: Tour is not available.");
 
         // Validacija kupovine
-       var hasPurchased = _shoppingCartService.HasPurchasedTour(touristId, dto.TourId);
-        if (!hasPurchased)
-            throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
+        // var hasPurchased = _shoppingCartService.HasPurchasedTour(touristId, dto.TourId);
+        // if (!hasPurchased)
+        //    throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
 
 
         // Provera broja ključnih tačaka

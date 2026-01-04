@@ -64,4 +64,25 @@ public class FacilityDbRepository : IFacilityRepository
         _dbContext.SaveChanges();
         return existing;
     }
+
+    public List<Facility> GetRestaurants(double centerLatitude, double centerLongitude)
+    {
+        const double metersPerDegreeLat = 111_320.0;
+        double deltaLat = 1200 / metersPerDegreeLat;
+        double deltaLon = 1200 / (metersPerDegreeLat * Math.Cos(centerLatitude * Math.PI / 180.0));
+        double minLat = centerLatitude - deltaLat;
+        double maxLat = centerLatitude + deltaLat;
+        double minLon = centerLongitude - deltaLon;
+        double maxLon = centerLongitude + deltaLon;
+
+        return _dbContext.Facilities
+            .Where(f => 
+                f.Category == FacilityCategory.Restaurant && 
+                f.Latitude > minLat && 
+                f.Latitude < maxLat && 
+                f.Longitude > minLon && 
+                f.Longitude < maxLon)
+            .AsNoTracking()
+            .ToList();
+    }
 }
