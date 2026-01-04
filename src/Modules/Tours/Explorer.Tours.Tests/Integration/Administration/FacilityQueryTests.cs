@@ -50,4 +50,17 @@ public class FacilityQueryTests : BaseToursIntegrationTest
         response.ShouldNotBeNull();
         response!.Count.ShouldBeGreaterThanOrEqualTo(2);
     }
+
+    [Fact]
+    public void Retrieves_all_restaurants()
+    {
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateController(scope);
+        var db = scope.ServiceProvider.GetRequiredService<ToursContext>();
+
+        var response = ((ObjectResult)controller.GetRestaurants(45.25, 19.83).Result)?.Value as List<FacilityDto>;
+
+        response.ShouldNotBeNull();
+        response!.Count.ShouldBeGreaterThanOrEqualTo(2);
+    }
 }
