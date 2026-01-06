@@ -28,7 +28,7 @@ public class Tourist : Entity
         if (xp < 0) throw new ArgumentException("XP to add cannot be negative.");
         XP += xp;
 
-        const int xpPerLevel = 400;
+        const int xpPerLevel = 100;
         var newLevel = (XP / xpPerLevel) + 1;
 
         if (newLevel > Level)
