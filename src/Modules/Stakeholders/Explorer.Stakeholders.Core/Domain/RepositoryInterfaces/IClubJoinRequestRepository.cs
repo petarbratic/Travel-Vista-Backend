@@ -7,6 +7,7 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
         ClubJoinRequest Get(long id);
         ClubJoinRequest GetByTouristAndClub(long touristId, long clubId);
         ClubJoinRequest Create(ClubJoinRequest request);
+        List<ClubJoinRequest> GetByClub(long clubId);
         void Delete(long id);
     }
 }

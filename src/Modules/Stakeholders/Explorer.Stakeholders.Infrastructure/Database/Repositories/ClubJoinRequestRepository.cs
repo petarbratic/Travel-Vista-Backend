@@ -31,6 +31,11 @@ namespace Explorer.Stakeholders.Infrastructure.Database.Repositories
             return request;
         }
 
+        public List<ClubJoinRequest> GetByClub(long clubId)
+        {
+            return _context.ClubJoinRequests.Where(r => r.ClubId == clubId).ToList();
+        }
+
         public void Delete(long id)
         {
             var request = Get(id);

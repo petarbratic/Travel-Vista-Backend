@@ -1,11 +1,12 @@
-﻿using Explorer.Stakeholders.API.Public;
-using Explorer.Stakeholders.Infrastructure.Authentication; 
+﻿using Explorer.Stakeholders.API.Dtos; 
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Explorer.API.Controllers.Author
 {
-    [Authorize(Policy = "authorPolicy")]
+    [Authorize(Policy = "touristPolicy")]
     [Route("api/club-owner/club-join-request")]
     public class ClubOwnerJoinRequestController : Controller
     {
@@ -21,6 +22,13 @@ namespace Explorer.API.Controllers.Author
         {
             _requestService.Respond(User.PersonId(), id, accepted);
             return Ok();
+        }
+
+        [HttpGet("{clubId:long}")]
+        public ActionResult<List<ClubJoinRequestByTouristDto>> GetRequests(long clubId)
+        {
+            var result = _requestService.GetClubJoinRequests(User.PersonId(), clubId);
+            return Ok(result);
         }
     }
 }
