@@ -8,6 +8,8 @@ namespace Explorer.Stakeholders.Core.Domain
         public long ClubId { get; private set; }
         public DateTime RequestedAt { get; private set; }
 
+        public ClubJoinRequest() { }
+
         public ClubJoinRequest(long touristId, long clubId)
         {
             TouristId = touristId;
