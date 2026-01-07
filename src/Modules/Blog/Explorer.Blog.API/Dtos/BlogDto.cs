@@ -16,6 +16,7 @@ namespace Explorer.Blog.API.Dtos
         [StringLength(10000, MinimumLength = 1, ErrorMessage = "Opis mora biti između 1 i 10000 karaktera")]
         public string Description { get; set; }
 
+        public int EstimatedReadMinutes { get; set; }
         public DateTime CreationDate { get; set; }
         public DateTime? LastModifiedDate { get; set; }
         public int AuthorId { get; set; }
@@ -27,7 +28,7 @@ namespace Explorer.Blog.API.Dtos
         public bool IsActive { get; set; }
         public bool IsFamous { get; set; }
         public List<BlogImageDto> Images { get; set; } = new List<BlogImageDto>();
-        public int EstimatedReadMinutes { get; set; }
+
 
         public List<BlogVoteDto> Ratings { get; set; } = new List<BlogVoteDto>();
     }

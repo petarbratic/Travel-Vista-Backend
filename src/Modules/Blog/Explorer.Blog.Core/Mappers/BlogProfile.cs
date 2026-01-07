@@ -15,7 +15,7 @@ namespace Explorer.Blog.Core.Mappers
         public BlogProfile()
         {
             CreateMap<BlogDto, BlogEntity>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))  // ✅ Uvek mapiraj Id
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))  // always map Id
                 .ForMember(dest => dest.CreationDate, opt => opt.Ignore())
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
@@ -25,17 +25,17 @@ namespace Explorer.Blog.Core.Mappers
                     opt => opt.MapFrom(s => s.GetScore() > 100 || s.Comments.Count > 10))
                 .ForMember(d => d.IsFamous,
                     opt => opt.MapFrom(s => s.GetScore() > 500 && s.Comments.Count > 30))
-                .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.Comments.Count))
-                // ✅ NEW: estimated read time
+                .ForMember(dest => dest.CommentsCount,
+                    opt => opt.MapFrom(src => src.Comments.Count))
+                // ✅ Estimated read time (minutes)
                 .ForMember(dest => dest.EstimatedReadMinutes,
                     opt => opt.MapFrom(src => CalculateReadMinutes(src.Description)));
 
             CreateMap<BlogImageDto, BlogImageEntity>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());  // Id se generiše u bazi
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<BlogImageEntity, BlogImageDto>();
 
-            // za komentare
             CreateMap<Comment, CommentDto>();
             CreateMap<CommentDto, Comment>();
         }
@@ -60,7 +60,7 @@ namespace Explorer.Blog.Core.Mappers
 
             var wordCount = s.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
 
-            // Standard: 200 wpm
+            // Standard: ~200 words per minute
             return Math.Max(1, (int)Math.Ceiling(wordCount / 200.0));
         }
     }
