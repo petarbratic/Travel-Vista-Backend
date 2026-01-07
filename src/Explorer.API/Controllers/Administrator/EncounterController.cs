@@ -44,13 +44,10 @@ namespace Explorer.API.Controllers.Administrator
         {
             try
             {
-<<<<<<< HEAD
                 // Kada administrator kreira encounter, on je uvek u draft stanju
-                encounterDto.Status = EncounterStatus.Draft.ToString();
-                var result = _encounterService.Create(encounterDto);
-=======
+                dto.Status = EncounterStatus.Draft.ToString();
                 var result = _encounterService.Create(dto);
->>>>>>> origin/development
+
                 return Ok(result);
             }
             catch (ArgumentException e)

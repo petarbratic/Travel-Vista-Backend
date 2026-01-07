@@ -22,30 +22,18 @@ public class EncounterService : IEncounterService
 
     public EncounterDto Create(EncounterDto dto)
     {
-<<<<<<< HEAD
-        var geoPoint = new GeoPoint(encounterDto.Latitude, encounterDto.Longitude);
-        var encounterType = Enum.Parse<EncounterType>(encounterDto.Type);
-        var encounterStatus = Enum.Parse<EncounterStatus>(encounterDto.Status);
-=======
         var geoPoint = new GeoPoint(dto.Latitude, dto.Longitude);
         var encounterType = Enum.Parse<EncounterType>(dto.Type);
         var status = Enum.Parse<EncounterStatus>(dto.Status);
 
->>>>>>> origin/development
         var encounter = new Encounter(
             dto.Name,
             dto.Description,
             geoPoint,
-<<<<<<< HEAD
-            encounterDto.XP,
-            encounterStatus,
-            encounterType
-=======
             dto.XP,
             encounterType,
             status,
-            dto.ActionDescription 
->>>>>>> origin/development
+            dto.ActionDescription
         );
 
         var result = _encounterRepository.Create(encounter);

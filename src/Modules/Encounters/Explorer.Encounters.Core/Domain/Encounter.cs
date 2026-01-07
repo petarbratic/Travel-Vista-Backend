@@ -12,25 +12,9 @@ public class Encounter : AggregateRoot
     public EncounterType Type { get; private set; }
     public string? ActionDescription { get; private set; }
 
-<<<<<<< HEAD
-    private Encounter() { }
-    public Encounter(string name, string description, GeoPoint location, int xp, EncounterStatus status, EncounterType type)
-    {
-        Name = name;
-        Description = description;
-        Location = location;
-        XP = xp;
-        Type = type;
-        Status = status;
 
-        Validate();
-    }
-
-    public void Update(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status)
-=======
     protected Encounter() { }
     public Encounter(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status, string actionDescription = "")
->>>>>>> origin/development
     {
         Name = name;
         Description = description;
