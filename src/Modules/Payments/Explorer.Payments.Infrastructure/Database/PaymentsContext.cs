@@ -14,7 +14,7 @@ namespace Explorer.Payments.Infrastructure.Database
     {
         public DbSet<TourPurchaseToken> TourPurchaseTokens { get; set; }
         public DbSet<ShoppingCart> ShoppingCarts { get; set; }
-
+        public DbSet<TourPurchaseRecord> TourPurchaseRecords { get; set; }
         public PaymentsContext(DbContextOptions<PaymentsContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -51,6 +51,16 @@ namespace Explorer.Payments.Infrastructure.Database
                             c => c.ToList()
                         )
                     );
+            });
+
+            modelBuilder.Entity<TourPurchaseRecord>(entity =>
+            {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.TouristId).IsRequired();
+                entity.Property(r => r.TourId).IsRequired();
+                entity.Property(r => r.PriceAc).IsRequired().HasColumnType("decimal(18,2)");
+                entity.Property(r => r.PurchasedAt).IsRequired();
+                entity.HasIndex(r => r.TouristId);
             });
         }
     }
