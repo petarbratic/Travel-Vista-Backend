@@ -12,14 +12,14 @@ public class Encounter : AggregateRoot
     public EncounterType Type { get; private set; }
 
     private Encounter() { }
-    public Encounter(string name, string description, GeoPoint location, int xp, EncounterType type)
+    public Encounter(string name, string description, GeoPoint location, int xp, EncounterStatus status, EncounterType type)
     {
         Name = name;
         Description = description;
         Location = location;
         XP = xp;
         Type = type;
-        Status = EncounterStatus.Draft;
+        Status = status;
 
         Validate();
     }

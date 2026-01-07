@@ -1,5 +1,6 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
+using Explorer.Encounters.Core.Domain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -43,6 +44,8 @@ namespace Explorer.API.Controllers.Administrator
         {
             try
             {
+                // Kada administrator kreira encounter, on je uvek u draft stanju
+                encounterDto.Status = EncounterStatus.Draft.ToString();
                 var result = _encounterService.Create(encounterDto);
                 return Ok(result);
             }
