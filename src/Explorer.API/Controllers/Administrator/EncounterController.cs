@@ -40,13 +40,17 @@ namespace Explorer.API.Controllers.Administrator
         }
 
         [HttpPost]
-        public ActionResult<EncounterDto> Create([FromBody] EncounterDto encounterDto)
+        public ActionResult<EncounterDto> Create([FromBody] EncounterDto dto)
         {
             try
             {
+<<<<<<< HEAD
                 // Kada administrator kreira encounter, on je uvek u draft stanju
                 encounterDto.Status = EncounterStatus.Draft.ToString();
                 var result = _encounterService.Create(encounterDto);
+=======
+                var result = _encounterService.Create(dto);
+>>>>>>> origin/development
                 return Ok(result);
             }
             catch (ArgumentException e)

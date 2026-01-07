@@ -10,7 +10,9 @@ public class Encounter : AggregateRoot
     public int XP { get; private set; }
     public EncounterStatus Status { get; private set; }
     public EncounterType Type { get; private set; }
+    public string? ActionDescription { get; private set; }
 
+<<<<<<< HEAD
     private Encounter() { }
     public Encounter(string name, string description, GeoPoint location, int xp, EncounterStatus status, EncounterType type)
     {
@@ -25,6 +27,10 @@ public class Encounter : AggregateRoot
     }
 
     public void Update(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status)
+=======
+    protected Encounter() { }
+    public Encounter(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status, string actionDescription = "")
+>>>>>>> origin/development
     {
         Name = name;
         Description = description;
@@ -32,6 +38,20 @@ public class Encounter : AggregateRoot
         XP = xp;
         Type = type;
         Status = status;
+        ActionDescription = actionDescription;
+
+        Validate();
+    }
+
+    public void Update(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status, string actionDescription = "")
+    {
+        Name = name;
+        Description = description;
+        Location = location;
+        XP = xp;
+        Type = type;
+        Status = status;
+        ActionDescription = actionDescription;
 
         Validate();
     }
@@ -52,7 +72,7 @@ public class Encounter : AggregateRoot
         Status = EncounterStatus.Archived;
     }
 
-    private void Validate()
+    protected virtual void Validate()
     {
         if (string.IsNullOrWhiteSpace(Name))
             throw new ArgumentException("Name cannot be empty.");
@@ -62,6 +82,7 @@ public class Encounter : AggregateRoot
             throw new ArgumentException("XP cannot be negative.");
         if (Location == null)
             throw new ArgumentException("Location is required.");
+        
     }
     public void SetStatus(EncounterStatus status)
     {

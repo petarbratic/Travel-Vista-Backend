@@ -48,14 +48,10 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             var cart = _shoppingCartRepository.GetActiveForTourist(touristId)
                        ?? _shoppingCartRepository.Create(new ShoppingCart(touristId));
 
-            /*var tour = _tourRepository.GetById(tourId)
-                   ?? throw new InvalidOperationException("Tour not found.");
-            if (tour.ArchivedAt != null)
-                throw new InvalidOperationException("Cannot purchase archived tour.");
+            var tour = _internalTourService.GetById(tourId);
 
-            cart.AddItem(tour);*/
-
-            var tour = _internalTourService.GetById(tourId) ?? throw new InvalidOperationException("Tour not found.");
+            if (tour == null)
+                throw new InvalidOperationException("Tour not found.");
 
             if (tour.ArchivedAt != null)
                 throw new InvalidOperationException("Cannot purchase archived tour.");
@@ -63,10 +59,8 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             if (tour.Status != (int)TourStatusDto.Published)
                 throw new InvalidOperationException("Tour must be published to be added to cart.");
 
-
             var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);
             cart.AddItem(orderItem);
-
             _shoppingCartRepository.Update(cart);
 
             return _mapper.Map<ShoppingCartDto>(cart);

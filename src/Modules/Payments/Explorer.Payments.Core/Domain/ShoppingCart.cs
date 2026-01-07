@@ -58,9 +58,15 @@ namespace Explorer.Payments.Core.Domain
             Items.Remove(existing);
             RecalculateTotal();
         }
-        public void Clear()
+        public void ClearItems()
         {
             Items.Clear();
+            TotalPrice = 0;
+        }
+        // za dugme
+        public void Clear()
+        {
+            Items = new List<OrderItem>();
             TotalPrice = 0;
         }
         private void RecalculateTotal()

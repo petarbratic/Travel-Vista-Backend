@@ -38,7 +38,11 @@ public static class StakeholdersStartup
         services.AddScoped<IPreferenceService, PreferenceService>(); //preference
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();  //oprema
         services.AddScoped<IWalletService, WalletService>();
+<<<<<<< HEAD
         services.AddScoped<IInternalTouristXPAndLevelSerive, InternalTouristXPAndLevelService>();
+=======
+        services.AddScoped<IInternalWalletService, WalletService>();
+>>>>>>> origin/development
 
     }
 

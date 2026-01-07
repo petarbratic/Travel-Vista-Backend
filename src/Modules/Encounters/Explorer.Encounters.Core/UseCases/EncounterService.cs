@@ -20,23 +20,38 @@ public class EncounterService : IEncounterService
         _mapper = mapper;
     }
 
-    public EncounterDto Create(EncounterDto encounterDto)
+    public EncounterDto Create(EncounterDto dto)
     {
+<<<<<<< HEAD
         var geoPoint = new GeoPoint(encounterDto.Latitude, encounterDto.Longitude);
         var encounterType = Enum.Parse<EncounterType>(encounterDto.Type);
         var encounterStatus = Enum.Parse<EncounterStatus>(encounterDto.Status);
+=======
+        var geoPoint = new GeoPoint(dto.Latitude, dto.Longitude);
+        var encounterType = Enum.Parse<EncounterType>(dto.Type);
+        var status = Enum.Parse<EncounterStatus>(dto.Status);
+
+>>>>>>> origin/development
         var encounter = new Encounter(
-            encounterDto.Name,
-            encounterDto.Description,
+            dto.Name,
+            dto.Description,
             geoPoint,
+<<<<<<< HEAD
             encounterDto.XP,
             encounterStatus,
             encounterType
+=======
+            dto.XP,
+            encounterType,
+            status,
+            dto.ActionDescription 
+>>>>>>> origin/development
         );
 
         var result = _encounterRepository.Create(encounter);
         return _mapper.Map<EncounterDto>(result);
     }
+
 
     public EncounterDto Update(EncounterDto encounterDto)
     {
@@ -45,8 +60,11 @@ public class EncounterService : IEncounterService
             throw new KeyNotFoundException($"Encounter with id {encounterDto.Id} not found.");
 
         var geoPoint = new GeoPoint(encounterDto.Latitude, encounterDto.Longitude);
-        var encounterType = Enum.Parse<EncounterType>(encounterDto.Type);
+        var encounterType = Enum.TryParse(encounterDto.Type, true, out EncounterType t) ? t : EncounterType.Misc;
         var encounterStatus = Enum.Parse<EncounterStatus>(encounterDto.Status);
+
+
+        var actionDescription = encounterDto.ActionDescription ?? "";
 
         encounter.Update(
             encounterDto.Name,
@@ -54,7 +72,8 @@ public class EncounterService : IEncounterService
             geoPoint,
             encounterDto.XP,
             encounterType,
-            encounterStatus
+            encounterStatus,
+            actionDescription
         );
 
         var result = _encounterRepository.Update(encounter);

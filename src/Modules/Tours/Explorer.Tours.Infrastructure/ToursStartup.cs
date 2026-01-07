@@ -57,6 +57,7 @@ public static class ToursStartup
         services.AddScoped<ITouristTourService, TouristTourService>();
         services.AddScoped<IInternalPositionService, InternalPositionService>();
         services.AddScoped<ITourAccessService, TourAccessService>();
+        services.AddScoped<IInternalNotificationService, NotificationService>();
 
         services.AddScoped<IAdminTourProblemService, AdminTourProblemService>();
 
