@@ -3,12 +3,14 @@ using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.Domain;
 using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.API.Public;
 
 namespace Explorer.Encounters.Core.UseCases;
 
 public class EncounterService : IEncounterService
 {
     private readonly IEncounterRepository _encounterRepository;
+    private readonly ITouristLevelService _touristLevelService;
     private readonly IMapper _mapper;
 
     public EncounterService(IEncounterRepository encounterRepository, IMapper mapper)
@@ -82,5 +84,10 @@ public class EncounterService : IEncounterService
     {
         var encounters = _encounterRepository.GetActiveEncounters();
         return _mapper.Map<List<EncounterDto>>(encounters);
+    }
+    public bool CanTouristCreateEncounter(long touristId)
+    {
+        var level = _touristLevelService.GetLevel(touristId);
+        return level >= 10;
     }
 }

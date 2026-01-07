@@ -1,6 +1,7 @@
 ﻿using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.API.Public;
 using Explorer.Encounters.Core.Domain;
+using Explorer.Stakeholders.Infrastructure.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -41,6 +42,17 @@ namespace Explorer.API.Controllers.Tourist
             {
                 return BadRequest(e.Message);
             }
+        }
+        [HttpGet("can-create")]
+        public ActionResult<bool> CanCreate()
+        {
+            // 1) uzmi touristId iz tokena
+            var touristId = User.PersonId();
+
+            // 2) pitaj servis
+            var canCreate = _encounterService.CanTouristCreateEncounter(touristId);
+
+            return Ok(canCreate);
         }
     }
 }

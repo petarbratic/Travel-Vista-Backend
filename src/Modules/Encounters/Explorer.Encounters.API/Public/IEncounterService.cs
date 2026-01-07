@@ -10,4 +10,5 @@ public interface IEncounterService
     EncounterDto Get(long id);
     List<EncounterDto> GetAll();
     List<EncounterDto> GetActiveEncounters();
+    bool CanTouristCreateEncounter(long touristId);
 }
