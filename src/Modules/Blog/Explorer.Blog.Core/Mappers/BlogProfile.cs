@@ -15,7 +15,7 @@ namespace Explorer.Blog.Core.Mappers
         public BlogProfile()
         {
             CreateMap<BlogDto, BlogEntity>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))  // ✅ Uvek mapiraj Id
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))  // always map Id
                 .ForMember(dest => dest.CreationDate, opt => opt.Ignore())
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status));
 
@@ -25,17 +25,17 @@ namespace Explorer.Blog.Core.Mappers
                     opt => opt.MapFrom(s => s.GetScore() > 100 || s.Comments.Count > 10))
                 .ForMember(d => d.IsFamous,
                     opt => opt.MapFrom(s => s.GetScore() > 500 && s.Comments.Count > 30))
-                .ForMember(dest => dest.CommentsCount, opt => opt.MapFrom(src => src.Comments.Count))
-                // ✅ NOVO: procenjeno vreme čitanja (min read)
+                .ForMember(dest => dest.CommentsCount,
+                    opt => opt.MapFrom(src => src.Comments.Count))
+                // ✅ Estimated read time (minutes)
                 .ForMember(dest => dest.EstimatedReadMinutes,
                     opt => opt.MapFrom(src => CalculateReadMinutes(src.Description)));
 
             CreateMap<BlogImageDto, BlogImageEntity>()
-                .ForMember(dest => dest.Id, opt => opt.Ignore());  // Id se generiše u bazi
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
 
             CreateMap<BlogImageEntity, BlogImageDto>();
 
-            // za komentare
             CreateMap<Comment, CommentDto>();
             CreateMap<CommentDto, Comment>();
         }
@@ -44,17 +44,24 @@ namespace Explorer.Blog.Core.Mappers
         {
             if (string.IsNullOrWhiteSpace(text)) return 1;
 
-            // Skini HTML tagove ako ih ima
-            var noHtml = Regex.Replace(text, "<.*?>", " ");
-            noHtml = WebUtility.HtmlDecode(noHtml);
+            // 1) Strip HTML tags + decode entities
+            var s = Regex.Replace(text, "<[^>]+>", " ");
+            s = WebUtility.HtmlDecode(s);
 
-            // Brojanje reči (slova/brojevi/apostrof)
-            var wordCount = Regex.Matches(noHtml, @"\b[\p{L}\p{N}']+\b").Count;
+            // 2) Remove common markdown noise
+            s = Regex.Replace(s, @"```[\s\S]*?```", " ");          // code blocks
+            s = Regex.Replace(s, @"`[^`]*`", " ");                 // inline code
+            s = Regex.Replace(s, @"!\[.*?\]\(.*?\)", " ");         // markdown images
+            s = Regex.Replace(s, @"\[(.*?)\]\((.*?)\)", "$1");     // links -> text
+            s = Regex.Replace(s, @"[#>*_~]", " ");                 // markdown chars
+            s = Regex.Replace(s, @"\s+", " ").Trim();              // normalize whitespace
 
-            // Standard: ~200 reči u minuti
-            var minutes = (int)Math.Ceiling(wordCount / 200.0);
+            if (string.IsNullOrWhiteSpace(s)) return 1;
 
-            return Math.Max(1, minutes);
+            var wordCount = s.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length;
+
+            // Standard: ~200 words per minute
+            return Math.Max(1, (int)Math.Ceiling(wordCount / 200.0));
         }
     }
 }
