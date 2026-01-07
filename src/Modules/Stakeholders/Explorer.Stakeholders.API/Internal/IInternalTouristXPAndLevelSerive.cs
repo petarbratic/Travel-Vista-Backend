@@ -1,6 +1,7 @@
 ﻿namespace Explorer.Stakeholders.API.Internal;
 
-public interface IInternalTouristXPService
+public interface IInternalTouristXPAndLevelSerive
 {
     void AddExperience(long touristId, int xp);
+    int GetLevel(long touristId);
 }

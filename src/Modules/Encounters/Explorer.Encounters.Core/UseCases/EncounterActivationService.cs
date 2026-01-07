@@ -14,14 +14,14 @@ public class EncounterActivationService : IEncounterActivationService
     private readonly IEncounterActivationRepository _activationRepository;
     private readonly IEncounterRepository _encounterRepository;
     private readonly IInternalPositionService _positionService;
-    private readonly IInternalTouristXPService _touristXPService;
+    private readonly IInternalTouristXPAndLevelSerive _touristXPService;
     private readonly IMapper _mapper;
 
     public EncounterActivationService(
         IEncounterActivationRepository activationRepository,
         IEncounterRepository encounterRepository,
         IInternalPositionService positionService,
-        IInternalTouristXPService touristXPService,
+        IInternalTouristXPAndLevelSerive touristXPService,
         IMapper mapper)
     {
         _activationRepository = activationRepository;

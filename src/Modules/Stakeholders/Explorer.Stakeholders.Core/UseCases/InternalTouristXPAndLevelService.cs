@@ -3,11 +3,11 @@ using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Stakeholders.Core.UseCases;
 
-public class InternalTouristXPService : IInternalTouristXPService
+public class InternalTouristXPAndLevelService : IInternalTouristXPAndLevelSerive
 {
     private readonly ITouristRepository _touristRepository;
 
-    public InternalTouristXPService(ITouristRepository touristRepository)
+    public InternalTouristXPAndLevelService(ITouristRepository touristRepository)
     {
         _touristRepository = touristRepository;
     }
@@ -20,5 +20,12 @@ public class InternalTouristXPService : IInternalTouristXPService
 
         tourist.IncreaseXP(xp);
         _touristRepository.Update(tourist);
+    }
+    public int GetLevel(long touristId)
+    {
+        var tourist = _touristRepository.Get(touristId);
+        if (tourist == null)
+            throw new KeyNotFoundException($"Tourist with id {touristId} not found.");
+        return tourist.Level;
     }
 }
