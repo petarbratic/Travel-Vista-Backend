@@ -87,5 +87,41 @@ namespace Explorer.API.Controllers.Administrator
                 return NotFound(e.Message);
             }
         }
+
+        [HttpPut("{id}/approve")]
+        public ActionResult<EncounterDto> Approve(long id)
+        {
+            try
+            {
+                var result = _encounterService.Approve(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpPut("{id}/reject")]
+        public ActionResult<EncounterDto> Reject(long id)
+        {
+            try
+            {
+                var result = _encounterService.Reject(id);
+                return Ok(result);
+            }
+            catch (KeyNotFoundException e)
+            {
+                return NotFound(e.Message);
+            }
+            catch (ArgumentException e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

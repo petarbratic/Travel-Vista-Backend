@@ -63,4 +63,8 @@ public class Encounter : AggregateRoot
         if (Location == null)
             throw new ArgumentException("Location is required.");
     }
+    public void SetStatus(EncounterStatus status)
+    {
+        Status = status;
+    }
 }

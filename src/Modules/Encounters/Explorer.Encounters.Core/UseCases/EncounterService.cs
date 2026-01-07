@@ -91,4 +91,31 @@ public class EncounterService : IEncounterService
         var level = _internalTouristXPAndLevelSerive.GetLevel(touristId);  
         return level >= 10;
     }
+
+    public EncounterDto Approve(long id)
+    {
+        var encounter = _encounterRepository.GetById(id);
+        if (encounter == null) throw new KeyNotFoundException($"Encounter {id} not found.");
+
+        if (encounter.Status != EncounterStatus.PendingApproval)
+            throw new ArgumentException("Only PendingApproval encounters can be approved.");
+
+        encounter.SetStatus(EncounterStatus.Active);
+        var result = _encounterRepository.Update(encounter);
+        return _mapper.Map<EncounterDto>(result);
+    }
+
+    public EncounterDto Reject(long id)
+    {
+        var encounter = _encounterRepository.GetById(id);
+        if (encounter == null) throw new KeyNotFoundException($"Encounter {id} not found.");
+
+        if (encounter.Status != EncounterStatus.PendingApproval)
+            throw new ArgumentException("Only PendingApproval encounters can be rejected.");
+
+        encounter.SetStatus(EncounterStatus.Rejected);
+        var result = _encounterRepository.Update(encounter);
+        return _mapper.Map<EncounterDto>(result);
+    }
 }
+
