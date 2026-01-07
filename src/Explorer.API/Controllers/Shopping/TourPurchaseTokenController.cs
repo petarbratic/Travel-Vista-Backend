@@ -19,35 +19,33 @@ namespace Explorer.API.Controllers.Shopping
             _purchaseService = purchaseService;
         }
 
-        // POST: api/tourist/purchase/checkout
+        // src/Explorer.API/Controllers/Shopping/TourPurchaseController.cs
         [HttpPost("checkout")]
         public ActionResult<CheckoutResultDto> Checkout()
         {
             try
             {
+                Console.WriteLine("=== CHECKOUT CONTROLLER START ===");
                 var personId = GetPersonIdFromToken();
-                var result = _purchaseService.Checkout(personId);
+                Console.WriteLine($"Person ID: {personId}");
 
-                // Ako kupovina nije uspjela (nedovoljno AC-a), vraćamo BadRequest
+                var result = _purchaseService.Checkout(personId);
+                Console.WriteLine($"Service returned: Success={result.Success}");
+
                 if (!result.Success)
                 {
+                    Console.WriteLine($"BadRequest: {result.Message}");
                     return BadRequest(result);
                 }
 
-                // Ako je uspjela, vraćamo OK sa rezultatom
+                Console.WriteLine($"OK: {result.Tokens.Count} tokens");
                 return Ok(result);
-            }
-            catch (InvalidOperationException ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { message = "Unexpected error: " + ex.Message });
+                Console.WriteLine($"EXCEPTION: {ex.Message}");
+                Console.WriteLine($"Stack: {ex.StackTrace}");
+                return StatusCode(500, new { message = ex.Message });
             }
         }
 
