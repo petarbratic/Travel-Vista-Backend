@@ -1,10 +1,12 @@
-﻿using Explorer.API.Controllers.Shopping;
+﻿
+using Explorer.API.Controllers.Shopping;
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using Explorer.Payments.Tests.Integration;
+using Xunit;
+using System.Linq;
 
 namespace Explorer.Payments.Tests.Integration.Shopping;
 
@@ -13,10 +15,7 @@ public class TourPurchaseTokenQueryTests : BasePaymentsIntegrationTest
 {
     public TourPurchaseTokenQueryTests(PaymentsTestFactory factory) : base(factory) { }
 
-    private static string NewPersonId()
-    {
-        return (-10000 - Guid.NewGuid().GetHashCode()).ToString();
-    }
+    private static string NewPersonId() => (-10000 - Guid.NewGuid().GetHashCode()).ToString();
 
     [Fact]
     public void GetTokens_returns_all_for_tourist()
@@ -32,10 +31,17 @@ public class TourPurchaseTokenQueryTests : BasePaymentsIntegrationTest
         cart.Add(new ShoppingCartRequestDto { TourId = tour1 });
         cart.Add(new ShoppingCartRequestDto { TourId = tour2 });
 
-        purchase.Checkout();
+        var checkoutActionResult = purchase.Checkout();
+        var checkoutOk = checkoutActionResult.Result as OkObjectResult;
+        checkoutOk.ShouldNotBeNull();
+        var checkoutResult = checkoutOk.Value as CheckoutResultDto;
+        checkoutResult.ShouldNotBeNull();
+        checkoutResult.Success.ShouldBeTrue();
 
-        var result = ((ObjectResult)purchase.GetTokens().Result)?.Value
-                     as List<TourPurchaseTokenDto>;
+        var tokensActionResult = purchase.GetTokens();
+        var tokensOk = tokensActionResult.Result as OkObjectResult;
+        tokensOk.ShouldNotBeNull();
+        var result = tokensOk.Value as System.Collections.Generic.List<TourPurchaseTokenDto>;
 
         result.ShouldNotBeNull();
         result.Count.ShouldBe(2);
@@ -43,19 +49,11 @@ public class TourPurchaseTokenQueryTests : BasePaymentsIntegrationTest
         result.Select(t => t.TourId).ShouldContain(tour2);
     }
 
-    private static ShoppingCartController CreateCartController(IServiceScope scope, string personId)
-    {
-        return new ShoppingCartController(scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
-        {
-            ControllerContext = BuildContext(personId)
-        };
-    }
+    private static ShoppingCartController CreateCartController(IServiceScope scope, string personId) =>
+        new ShoppingCartController(scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
+        { ControllerContext = BuildContext(personId) };
 
-    private static TourPurchaseController CreatePurchaseController(IServiceScope scope, string personId)
-    {
-        return new TourPurchaseController(scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>())
-        {
-            ControllerContext = BuildContext(personId)
-        };
-    }
+    private static TourPurchaseController CreatePurchaseController(IServiceScope scope, string personId) =>
+        new TourPurchaseController(scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>())
+        { ControllerContext = BuildContext(personId) };
 }

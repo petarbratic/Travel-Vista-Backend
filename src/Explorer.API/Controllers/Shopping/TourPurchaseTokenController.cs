@@ -1,4 +1,5 @@
-﻿using Explorer.Payments.API.Dtos;
+﻿// src/Explorer.API/Controllers/Shopping/TourPurchaseController.cs
+using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,11 +21,34 @@ namespace Explorer.API.Controllers.Shopping
 
         // POST: api/tourist/purchase/checkout
         [HttpPost("checkout")]
-        public ActionResult<List<TourPurchaseTokenDto>> Checkout()
+        public ActionResult<CheckoutResultDto> Checkout()
         {
-            var personId = GetPersonIdFromToken();
-            var result = _purchaseService.Checkout(personId);
-            return Ok(result);
+            try
+            {
+                var personId = GetPersonIdFromToken();
+                var result = _purchaseService.Checkout(personId);
+
+                // Ako kupovina nije uspjela (nedovoljno AC-a), vraćamo BadRequest
+                if (!result.Success)
+                {
+                    return BadRequest(result);
+                }
+
+                // Ako je uspjela, vraćamo OK sa rezultatom
+                return Ok(result);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { message = "Unexpected error: " + ex.Message });
+            }
         }
 
         // GET: api/tourist/purchase
@@ -53,7 +77,6 @@ namespace Explorer.API.Controllers.Shopping
             // Primarni claim
             var personIdClaim = HttpContext.User.Claims
                 .FirstOrDefault(c => c.Type == "personId");
-
             if (personIdClaim != null &&
                 long.TryParse(personIdClaim.Value, out var personId))
             {
@@ -63,7 +86,6 @@ namespace Explorer.API.Controllers.Shopping
             // Sekundarni (za testove)
             var userIdClaim = HttpContext.User.Claims
                 .FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-
             if (userIdClaim != null &&
                 long.TryParse(userIdClaim.Value, out var userId))
             {
