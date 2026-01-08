@@ -9,6 +9,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+
 using Moq;
 
 namespace Explorer.Payments.Tests
@@ -121,6 +122,52 @@ namespace Explorer.Payments.Tests
                 It.IsAny<string>()));
 
             services.AddScoped<IInternalNotificationService>(_ => notificationMock.Object);
+            // ==================== MOCK: IInternalBundleService ====================
+            var existingBundle = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalBundleService));
+            if (existingBundle != null) services.Remove(existingBundle);
+
+            var bundleMock = new Mock<IInternalBundleService>();
+
+            // Bundle -1: Published, 1000 AC, sadrži ture [-2, -4]
+            bundleMock.Setup(s => s.GetById(-1)).Returns(new Tours.API.Dtos.BundleDto
+            {
+                Id = -1,
+                Name = "Test Bundle -1",
+                Price = 1000m,
+                Status = 1, // Published
+                AuthorId = -100,
+                TourIds = new List<long> { -2, -4 },
+                CreatedAt = DateTime.UtcNow.AddDays(-10)
+            });
+
+            // Bundle -2: Draft (NE MOŽE se kupiti)
+            bundleMock.Setup(s => s.GetById(-2)).Returns(new Tours.API.Dtos.BundleDto
+            {
+                Id = -2,
+                Name = "Draft Bundle",
+                Price = 500m,
+                Status = 0, // Draft
+                AuthorId = -100,
+                TourIds = new List<long> { -2 },
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Bundle -3: Published ali JEFTINIJI (200 AC)
+            bundleMock.Setup(s => s.GetById(-3)).Returns(new Tours.API.Dtos.BundleDto
+            {
+                Id = -3,
+                Name = "Cheap Bundle",
+                Price = 200m,
+                Status = 1, // Published
+                AuthorId = -100,
+                TourIds = new List<long> { -2 },
+                CreatedAt = DateTime.UtcNow
+            });
+
+            // Bundle -99: Ne postoji
+            bundleMock.Setup(s => s.GetById(-99)).Returns((Tours.API.Dtos.BundleDto)null);
+
+            services.AddScoped<IInternalBundleService>(_ => bundleMock.Object);
 
             return services;
         }
