@@ -12,6 +12,7 @@ public class Encounter : AggregateRoot
     public EncounterType Type { get; private set; }
     public string? ActionDescription { get; private set; }
 
+
     protected Encounter() { }
     public Encounter(string name, string description, GeoPoint location, int xp, EncounterType type, EncounterStatus status, string actionDescription = "")
     {
@@ -66,5 +67,9 @@ public class Encounter : AggregateRoot
         if (Location == null)
             throw new ArgumentException("Location is required.");
         
+    }
+    public void SetStatus(EncounterStatus status)
+    {
+        Status = status;
     }
 }
