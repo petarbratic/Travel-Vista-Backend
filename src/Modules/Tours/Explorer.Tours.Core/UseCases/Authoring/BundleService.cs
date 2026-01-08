@@ -12,10 +12,11 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Authoring
 {
-    public class BundleService : IBundleService
+    public class BundleService : IBundleService, IInternalBundleService
     {
         private readonly IBundleRepository _bundleRepository;
         private readonly ITourRepository _tourRepository;
@@ -173,6 +174,15 @@ namespace Explorer.Tours.Core.UseCases.Authoring
         {
             var bundles = _bundleRepository.GetPublished();
             return bundles.Select(_mapper.Map<BundleDto>).ToList();
+        }
+        // Internal metoda za Payments modul
+        BundleDto IInternalBundleService.GetById(long id)
+        {
+            var bundle = _bundleRepository.GetById(id);
+            if (bundle == null)
+                throw new NotFoundException($"Bundle with id {id} not found.");
+
+            return _mapper.Map<BundleDto>(bundle);
         }
     }
 }

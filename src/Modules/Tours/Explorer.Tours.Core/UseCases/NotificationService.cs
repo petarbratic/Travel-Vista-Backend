@@ -162,5 +162,18 @@ public class NotificationService : INotificationService, IInternalNotificationSe
         var notificationDto = _mapper.Map<NotificationDto>(notification);
         _ = _publisher.PublishAsync(notificationDto);
     }
+    public void CreateBundlePurchaseNotification(long touristId, long bundleId, string bundleName)
+    {
+        var notification = new Notification(
+            recipientId: touristId,
+            type: NotificationType.BundlePurchase,
+            relatedEntityId: bundleId,
+            message: $"You purchased bundle '{bundleName}' successfully! Check your tours."
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
 
 }
