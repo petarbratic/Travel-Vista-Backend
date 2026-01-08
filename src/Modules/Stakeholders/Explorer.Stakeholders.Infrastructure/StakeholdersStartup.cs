@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
@@ -38,6 +39,7 @@ public static class StakeholdersStartup
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();  //oprema
         services.AddScoped<IWalletService, WalletService>();
         services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
+        services.AddScoped<IInternalWalletService, WalletService>();
 
     }
 
