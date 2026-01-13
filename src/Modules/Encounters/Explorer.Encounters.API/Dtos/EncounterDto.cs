@@ -12,12 +12,12 @@ public class EncounterDto
     public string Type { get; set; }
 
     // Za Misc encounter
-    public string ActionDescription { get; set; }
+    public string? ActionDescription { get; set; }
 
     // Za Social encounter
     public int? RequiredPeopleCount { get; set; }
     public double? RangeInMeters { get; set; }
 
     // Za HiddenLocation encounter
-    public string ImageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 }
