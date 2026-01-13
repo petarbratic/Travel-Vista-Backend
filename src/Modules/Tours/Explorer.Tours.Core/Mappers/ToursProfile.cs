@@ -92,5 +92,9 @@ public class ToursProfile : Profile
         CreateMap<Coupon, CouponDto>().ReverseMap();
         CreateMap<CouponCreateDto, Coupon>();
         CreateMap<CouponUpdateDto, Coupon>();
+
+        CreateMap<Sale, SaleDto>().ReverseMap();
+        CreateMap<SaleCreateDto, Sale>();
+        CreateMap<SaleUpdateDto, Sale>();
     }
 }
