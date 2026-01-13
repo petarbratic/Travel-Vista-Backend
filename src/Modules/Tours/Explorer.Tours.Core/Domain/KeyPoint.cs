@@ -1,4 +1,5 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
+using Explorer.BuildingBlocks.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,8 @@ namespace Explorer.Tours.Core.Domain
         public string Secret { get; private set; }
         public double Latitude { get; private set; }
         public double Longitude { get; private set; }
+        public long? EncounterId { get; private set; }
+        public bool IsEncounterMandatory { get; private set; }
 
         private KeyPoint() { }
 
@@ -38,6 +41,8 @@ namespace Explorer.Tours.Core.Domain
             Secret = secret;
             Latitude = latitude;
             Longitude = longitude;
+            EncounterId = null;
+            IsEncounterMandatory = false;
         }
         public void Update(string name, string description, string imageUrl, string secret,
                    double latitude, double longitude)
@@ -57,6 +62,21 @@ namespace Explorer.Tours.Core.Domain
             Secret = secret;
             Latitude = latitude;
             Longitude = longitude;
+        }
+
+        public void AttachEncounter(long encounterId, bool isMandatory)
+        {
+            if (EncounterId != null)
+                throw new InvalidOperationException("Key point already has an encounter.");
+
+            EncounterId = encounterId;
+            IsEncounterMandatory = isMandatory;
+        }
+
+        public void DetachEncounter()
+        {
+            EncounterId = null;
+            IsEncounterMandatory = false;
         }
     }
 }
