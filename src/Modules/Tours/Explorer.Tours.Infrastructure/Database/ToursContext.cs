@@ -28,6 +28,8 @@ public class ToursContext : DbContext
 
     public DbSet<Bundle> Bundles { get; set; }
 
+    public DbSet<Coupon> Coupons { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -277,6 +279,20 @@ public class ToursContext : DbContext
                 ));
 
             entity.HasIndex(b => b.AuthorId);
+        });
+
+        // Coupon configuration
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Code).IsRequired().HasMaxLength(8);
+            entity.Property(c => c.DiscountPercentage).IsRequired().HasColumnType("decimal(5,2)");
+            entity.Property(c => c.AuthorId).IsRequired();
+            entity.Property(c => c.CreatedAt).IsRequired();
+            
+            entity.HasIndex(c => c.Code).IsUnique();
+            entity.HasIndex(c => c.AuthorId);
+            entity.HasIndex(c => c.TourId);
         });
     }
 }
