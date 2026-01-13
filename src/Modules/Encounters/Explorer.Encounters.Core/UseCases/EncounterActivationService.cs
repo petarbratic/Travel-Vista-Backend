@@ -6,6 +6,7 @@ using Explorer.Encounters.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.API.Internal;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
+using System.Diagnostics;
 
 namespace Explorer.Encounters.Core.UseCases;
 
@@ -90,11 +91,7 @@ public class EncounterActivationService : IEncounterActivationService
         // ===== SOCIAL ENCOUNTER: Auto-complete ako ima dovoljno ljudi =====
         if (encounter.Type == EncounterType.Social)
         {
-            int peopleNearby = CountPeopleNearEncounter(
-                encounter.Location.Latitude,
-                encounter.Location.Longitude,
-                encounter.RangeInMeters ?? 30.0,
-                touristId
+            int peopleNearby = CountPeopleNearEncounter(encounter.Id, touristId
             );
 
             if (peopleNearby >= encounter.RequiredPeopleCount)
@@ -191,12 +188,7 @@ public class EncounterActivationService : IEncounterActivationService
                 // Za Social: Dodaj trenutni broj ljudi u blizini
                 if (encounter.Type == EncounterType.Social)
                 {
-                    dto.CurrentPeopleNearby = CountPeopleNearEncounter(
-                        encounter.Location.Latitude,
-                        encounter.Location.Longitude,
-                        encounter.RangeInMeters ?? 30.0,
-                        touristId 
-                    );
+                    dto.CurrentPeopleNearby = CountPeopleNearEncounter(encounter.Id, touristId);
                 }
 
                 nearbyEncounters.Add(dto);
@@ -288,23 +280,27 @@ public class EncounterActivationService : IEncounterActivationService
         }
     }
 
-    private int CountPeopleNearEncounter(double centerLat, double centerLon, double radiusMeters, long excludeTouristId = 0)
+    public int CountPeopleNearEncounter(long encounterId, long touristId)
     {
+        var encounter = _encounterRepository.GetById(encounterId);
         var allPositions = _positionService.GetAll();
 
         int count = 0;
         foreach (var position in allPositions)
         {
-            // ===== DODAJ: Isključi trenutnog turista =====
-            if (position.TouristId == excludeTouristId)
+            if (position.TouristId == touristId)
+            {
                 continue;
+            }
 
-            var distance = DistanceCalculator.CalculateDistance(
-                centerLat, centerLon,
-                position.Latitude, position.Longitude
+            double distance = DistanceCalculator.CalculateDistance(
+                encounter.Location.Latitude,
+                encounter.Location.Longitude,
+                position.Latitude,
+                position.Longitude
             );
 
-            if (distance <= radiusMeters)
+            if (distance <= encounter.RangeInMeters)
             {
                 count++;
             }
