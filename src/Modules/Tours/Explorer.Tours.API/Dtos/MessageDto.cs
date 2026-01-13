@@ -7,4 +7,6 @@ public class MessageDto
     public string Content { get; set; }
     public DateTime Timestamp { get; set; }
     public int AuthorType { get; set; } // 0=Tourist, 1=Author, 2=Admin
+    public string SenderName { get; set; }
+    public string SenderSurname { get; set; }
 }
