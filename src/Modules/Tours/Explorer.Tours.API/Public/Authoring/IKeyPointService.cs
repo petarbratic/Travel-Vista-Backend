@@ -16,6 +16,5 @@ namespace Explorer.Tours.API.Public.Authoring
         void Delete(long id, long authorId);
         KeyPointDto GetById(long id);
         KeyPointDto AttachEncounter(long keyPointId, long encounterId, bool isMandatory, long authorId);
-        void DetachEncounter(long keyPointId, long authorId);
     }
 }
