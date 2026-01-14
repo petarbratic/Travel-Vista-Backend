@@ -306,6 +306,7 @@ public class ToursContext : DbContext
             entity.Property(s => s.DiscountPercentage).IsRequired().HasColumnType("decimal(5,2)");
             entity.Property(s => s.AuthorId).IsRequired();
             entity.Property(s => s.CreatedAt).IsRequired();
+            entity.Property(s => s.UpdatedAt).IsRequired(false);
 
             entity.Property(s => s.TourIds)
                 .HasColumnType("jsonb")
