@@ -10,4 +10,5 @@ public interface IFacilityRepository
     Facility? Get(long id);
     Facility Update(Facility facility);
     void Delete(long id);
+    List<Facility> GetRestaurants(double centerLatitude, double centerLongitude);
 }

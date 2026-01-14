@@ -53,4 +53,10 @@ public class FacilityService : IFacilityService
 
         _facilityRepository.Delete(id);
     }
+
+    public List<FacilityDto> GetRestaurants(double centerLatitude, double centerLongitude)
+    {
+        var restaurants = _facilityRepository.GetRestaurants(centerLatitude, centerLongitude);
+        return restaurants.Select(r => _mapper.Map<FacilityDto>(r)).ToList();
+    }
 }

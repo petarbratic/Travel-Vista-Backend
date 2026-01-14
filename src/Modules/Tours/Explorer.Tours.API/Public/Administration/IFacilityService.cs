@@ -13,4 +13,5 @@ public interface IFacilityService
     List<FacilityDto> GetAll();
     FacilityDto Update(long id, FacilityUpdateDto dto);
     void Delete(long id);
+    List<FacilityDto> GetRestaurants(double centerLatitude, double centerLongitude);
 }

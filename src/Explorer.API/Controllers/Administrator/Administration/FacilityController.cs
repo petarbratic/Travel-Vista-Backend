@@ -2,6 +2,7 @@
 using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Explorer.Tours.Core.Domain;
 
 namespace Explorer.API.Controllers.Administration;
 
@@ -47,5 +48,15 @@ public class FacilityController : ControllerBase
     {
         _facilityService.Delete(id);
         return Ok();
+    }
+
+    // GET RESTAURANTS
+    [AllowAnonymous]
+    [Authorize(Policy = "touristPolicy")]
+    [HttpGet("/api/facilities/restaurants")]
+    public ActionResult<List<FacilityDto>> GetRestaurants(double centerLatitude, double centerLongitude)
+    {
+        var result = _facilityService.GetRestaurants(centerLatitude, centerLongitude);
+        return Ok(result);
     }
 }
