@@ -106,34 +106,34 @@ VALUES (
 ------------------------------------------------------
 
 -- KeyPoints za Mountain Adventure (-100)
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude")
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude", "EncounterId", "IsEncounterMandatory")
 VALUES 
-    (-200, -100, 'Mountain Base Camp', 'Starting point', 'http://img.com/base.jpg', 'secret1', 43.3209, 21.8958),
-    (-201, -100, 'Summit Peak', 'Highest point', 'http://img.com/summit.jpg', 'secret2', 43.3309, 21.9058);
+    (-200, -100, 'Mountain Base Camp', 'Starting point', 'http://img.com/base.jpg', 'secret1', 43.3209, 21.8958, null, false),
+    (-201, -100, 'Summit Peak', 'Highest point', 'http://img.com/summit.jpg', 'secret2', 43.3309, 21.9058, null, false);
 
 -- KeyPoints za City Tour Belgrade (-101)
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude")
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude", "EncounterId", "IsEncounterMandatory")
 VALUES 
-    (-202, -101, 'Kalemegdan Fortress', 'Historic fortress', 'http://img.com/kalemegdan.jpg', 'secret3', 44.8230, 20.4503),
-    (-203, -101, 'Skadarlija Street', 'Bohemian quarter', 'http://img.com/skadarlija.jpg', 'secret4', 44.8172, 20.4639);
+    (-202, -101, 'Kalemegdan Fortress', 'Historic fortress', 'http://img.com/kalemegdan.jpg', 'secret3', 44.8230, 20.4503, null, false),
+    (-203, -101, 'Skadarlija Street', 'Bohemian quarter', 'http://img.com/skadarlija.jpg', 'secret4', 44.8172, 20.4639, null, false);
 
 -- KeyPoints za Beach Relax (-102)
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude")
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude", "EncounterId", "IsEncounterMandatory")
 VALUES 
-    (-204, -102, 'Golden Beach', 'Main beach area', 'http://img.com/golden.jpg', 'secret5', 40.6401, 22.9444),
-    (-205, -102, 'Beach Bar', 'Refreshments', 'http://img.com/bar.jpg', 'secret6', 40.6501, 22.9544);
+    (-204, -102, 'Golden Beach', 'Main beach area', 'http://img.com/golden.jpg', 'secret5', 40.6401, 22.9444, null, false),
+    (-205, -102, 'Beach Bar', 'Refreshments', 'http://img.com/bar.jpg', 'secret6', 40.6501, 22.9544, null, false);
 
 -- KeyPoints za Extreme Sports (-103)
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude")
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude", "EncounterId", "IsEncounterMandatory")
 VALUES 
-    (-206, -103, 'Rafting Start', 'River entry', 'http://img.com/rafting.jpg', 'secret7', 43.1486, 20.5219),
-    (-207, -103, 'Bungee Platform', 'Jump zone', 'http://img.com/bungee.jpg', 'secret8', 43.1586, 20.5319);
+    (-206, -103, 'Rafting Start', 'River entry', 'http://img.com/rafting.jpg', 'secret7', 43.1486, 20.5219, null, false),
+    (-207, -103, 'Bungee Platform', 'Jump zone', 'http://img.com/bungee.jpg', 'secret8', 43.1586, 20.5319, null, false);
 
 -- KeyPoints za Wine Tasting (-104)
-INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude")
+INSERT INTO tours."KeyPoints" ("Id", "TourId", "Name", "Description", "ImageUrl", "Secret", "Latitude", "Longitude", "EncounterId", "IsEncounterMandatory")
 VALUES 
-    (-208, -104, 'First Winery', 'Premium wines', 'http://img.com/winery1.jpg', 'secret9', 44.0165, 21.2686),
-    (-209, -104, 'Second Winery', 'Vintage collection', 'http://img.com/winery2.jpg', 'secret10', 44.0265, 21.2786);
+    (-208, -104, 'First Winery', 'Premium wines', 'http://img.com/winery1.jpg', 'secret9', 44.0165, 21.2686, null, false),
+    (-209, -104, 'Second Winery', 'Vintage collection', 'http://img.com/winery2.jpg', 'secret10', 44.0265, 21.2786, null, false);
 
 -----------------------------------------------------
 -- TOUR REVIEWS ZA TESTIRANJE RATING FILTERA

@@ -99,5 +99,25 @@ namespace Explorer.Tours.Core.UseCases.Authoring
             var result = _keyPointRepository.Get(id);
             return _mapper.Map<KeyPointDto>(result);
         }
+
+        public KeyPointDto AttachEncounter(long keyPointId, long encounterId, bool isMandatory, long authorId)
+        {
+            var keyPoint = _keyPointRepository.Get(keyPointId)
+                ?? throw new NotFoundException($"Key point with id {keyPointId} not found.");
+
+            var tour = _tourRepository.GetById(keyPoint.TourId)
+                ?? throw new NotFoundException($"Tour with id {keyPoint.TourId} not found.");
+
+            if (tour.AuthorId != authorId)
+                throw new ForbiddenException("You can only modify key points on your own tours.");
+
+            if (keyPoint.EncounterId.HasValue)
+                throw new InvalidOperationException("Key point already has an encounter.");
+
+            keyPoint.AttachEncounter(encounterId, isMandatory);
+            var updated = _keyPointRepository.Update(keyPoint);
+
+            return _mapper.Map<KeyPointDto>(updated);
+        }
     }
 }
