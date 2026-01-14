@@ -11,4 +11,5 @@ public interface IInternalTourService
 {
     List<TourForRecommendationDto> GetPublishedToursForRecommendation();
     TourDto GetById(long tourId);
+    decimal GetDiscountedPrice(long tourId, decimal originalPrice);
 }

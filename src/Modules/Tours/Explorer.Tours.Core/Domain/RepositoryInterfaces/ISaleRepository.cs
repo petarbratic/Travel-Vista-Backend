@@ -7,4 +7,5 @@ public interface ISaleRepository
     void Delete(long id);
     Sale? GetById(long id);
     List<Sale> GetByAuthorId(long authorId);
+    List<Sale> GetActiveSalesForTours(List<long> tourIds);
 }

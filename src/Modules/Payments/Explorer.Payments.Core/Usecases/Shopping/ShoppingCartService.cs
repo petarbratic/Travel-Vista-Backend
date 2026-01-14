@@ -62,7 +62,8 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             if (tour.Status != (int)TourStatusDto.Published)
                 throw new InvalidOperationException("Tour must be published to be added to cart.");
 
-            var orderItem = new OrderItem(tour.Id, tour.Name, tour.Price);
+            var discountedPrice = _internalTourService.GetDiscountedPrice(tour.Id, tour.Price);
+            var orderItem = new OrderItem(tour.Id, tour.Name, discountedPrice);
             cart.AddItem(orderItem);
             _shoppingCartRepository.Update(cart);
 

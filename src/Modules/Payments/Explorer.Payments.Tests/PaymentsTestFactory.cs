@@ -91,6 +91,10 @@ namespace Explorer.Payments.Tests
                     ArchivedAt = null
                 });
 
+            // GetDiscountedPrice vraća originalnu cenu (nema popusta u testovima)
+            internalTourMock.Setup(s => s.GetDiscountedPrice(It.IsAny<long>(), It.IsAny<decimal>()))
+                .Returns<long, decimal>((tourId, originalPrice) => originalPrice);
+
             services.AddScoped<IInternalTourService>(_ => internalTourMock.Object);
 
             // ==================== MOCK: IInternalWalletService ====================
