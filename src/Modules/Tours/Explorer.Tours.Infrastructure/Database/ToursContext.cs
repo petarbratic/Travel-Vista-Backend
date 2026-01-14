@@ -26,6 +26,10 @@ public class ToursContext : DbContext
 
     public DbSet<Diary> Diaries { get; set; }
 
+    public DbSet<Bundle> Bundles { get; set; }
+
+    public DbSet<Coupon> Coupons { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -250,6 +254,45 @@ public class ToursContext : DbContext
                 .IsRequired();
 
             builder.HasIndex(d => d.TouristId);
+        });
+
+        // Bundle configuration
+        modelBuilder.Entity<Bundle>(entity =>
+        {
+            entity.HasKey(b => b.Id);
+            entity.Property(b => b.Name).IsRequired();
+            entity.Property(b => b.Price).IsRequired().HasColumnType("decimal(18,2)");
+            entity.Property(b => b.Status).HasConversion<int>().IsRequired();
+            entity.Property(b => b.AuthorId).IsRequired();
+            entity.Property(b => b.CreatedAt).IsRequired();
+
+            entity.Property(b => b.TourIds)
+                .HasColumnType("jsonb")
+                .HasConversion(
+                    v => JsonSerializer.Serialize(v, (JsonSerializerOptions?)null),
+                    v => JsonSerializer.Deserialize<List<long>>(v, (JsonSerializerOptions?)null) ?? new List<long>()
+                )
+                .Metadata.SetValueComparer(new ValueComparer<List<long>>(
+                    (c1, c2) => c1.SequenceEqual(c2),
+                    c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                    c => c.ToList()
+                ));
+
+            entity.HasIndex(b => b.AuthorId);
+        });
+
+        // Coupon configuration
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasKey(c => c.Id);
+            entity.Property(c => c.Code).IsRequired().HasMaxLength(8);
+            entity.Property(c => c.DiscountPercentage).IsRequired().HasColumnType("decimal(5,2)");
+            entity.Property(c => c.AuthorId).IsRequired();
+            entity.Property(c => c.CreatedAt).IsRequired();
+            
+            entity.HasIndex(c => c.Code).IsUnique();
+            entity.HasIndex(c => c.AuthorId);
+            entity.HasIndex(c => c.TourId);
         });
     }
 }

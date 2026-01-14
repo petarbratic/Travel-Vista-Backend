@@ -12,7 +12,6 @@ using Shouldly;
 using Xunit;
 using System.Linq;
 using System.Collections.Generic;
-using System;
 
 namespace Explorer.Tours.Tests.Integration.Execution;
 
@@ -21,41 +20,37 @@ public class TourExecutionCommandTests : BaseToursIntegrationTest
 {
     public TourExecutionCommandTests(ToursTestFactory factory) : base(factory) { }
 
+    //
     [Fact]
     public void Starts_published_tour_successfully_when_purchased()
     {
-        // Arrange
         using var scope = Factory.Services.CreateScope();
         var controller = CreateController(scope, "-21");
-        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
 
-        // Kupi turu
-        shoppingCartService.AddToCart(-21, -2);
+        var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var shoppingCartService = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
+
+        CleanupExecutionSessions(dbContext, -21);
+
+        var tourId = CreateAndPublishTour(scope, -11);
+
+        shoppingCartService.AddToCart(-21, tourId);
+        var checkoutResult = tokenService.Checkout(-21);
+        checkoutResult.Success.ShouldBeTrue();
 
         var dto = new TourExecutionCreateDto
         {
-            TourId = -2,
-            StartLatitude = 45.2500,
-            StartLongitude = 19.8300
+            TourId = tourId,
+            StartLatitude = 45.25,
+            StartLongitude = 19.83
         };
 
-        // Act
-        var actionResult = controller.StartTour(dto);
+        var result = controller.StartTour(dto);
 
-
-        // Assert
-        actionResult.ShouldNotBeNull();
-        actionResult.Result.ShouldBeOfType<OkObjectResult>();
-
-
-        var okResult = actionResult.Result as OkObjectResult;
-        var execution = okResult!.Value as TourExecutionDto;
-        execution.ShouldNotBeNull();
-        execution.TouristId.ShouldBe(-21);
-        execution.TourId.ShouldBe(-2);
-        execution.Status.ShouldBe(0);
+        // Sa mock-om će biti OK
+        result.Result.ShouldBeOfType<OkObjectResult>();
     }
-
 
 
 

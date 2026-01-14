@@ -2,12 +2,11 @@
 using Explorer.Encounters.API.Dtos;
 using Explorer.Encounters.Core.Domain;
 
-
 namespace Explorer.Encounters.Core.Mappers
 {
     public class EncountersProfile : Profile
     {
-        public EncountersProfile() 
+        public EncountersProfile()
         {
             CreateMap<EncounterDto, Encounter>()
                .ForMember(dest => dest.Location, opt => opt.MapFrom(src => new GeoPoint(src.Latitude, src.Longitude)))

@@ -33,8 +33,22 @@ namespace Explorer.API.Controllers.Tourist
             return Ok(tours);
         }
 
+        //Istaknute ture za neprijavljene korisnike
+        [HttpGet("highlighted")]
+        [AllowAnonymous]
+        public ActionResult<List<TourPreviewDto>> GetHighlightedTours([FromQuery] int count = 6)
+        {
+            var result = _touristTourService.GetPublishedTours()
+                .OrderByDescending(t => t.AverageRating)
+                .ThenByDescending(t => t.Reviews.Count)
+                .Take(count)
+                .ToList();
+            
+            return Ok(result);
+        }
 
         [HttpGet("{id}/preview")]
+        [AllowAnonymous] // Dodato da neprijavljeni mogu videti preview
         public ActionResult<TourPreviewDto> GetTourPreview(long id)
         {
             var result = _touristTourService.GetPreview(id);
