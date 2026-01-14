@@ -4,6 +4,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Administration;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces; 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
@@ -404,7 +405,8 @@ public class AdminTourProblemCommandTests : BaseToursIntegrationTest
     private static AdminTourProblemController CreateController(IServiceScope scope)
     {
         return new AdminTourProblemController(
-            scope.ServiceProvider.GetRequiredService<IAdminTourProblemService>())
+            scope.ServiceProvider.GetRequiredService<IAdminTourProblemService>(),
+            scope.ServiceProvider.GetRequiredService<IPersonRepository>())
         {
             ControllerContext = BuildContext("-1") 
         };
