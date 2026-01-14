@@ -21,4 +21,10 @@ public class TourPreviewDto
     public List<string> Images { get; set; }
 
     public int Status { get; set; } // za tour execution
+
+    // Sale properties
+    public bool OnSale { get; set; }
+    public double OriginalPrice { get; set; }
+    public double DiscountedPrice { get; set; }
+    public double DiscountPercentage { get; set; }
 }

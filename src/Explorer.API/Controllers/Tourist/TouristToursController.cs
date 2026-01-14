@@ -94,9 +94,11 @@ namespace Explorer.API.Controllers.Tourist
             [FromQuery] List<int>? difficulties,
             [FromQuery] decimal? minPrice,
             [FromQuery] decimal? maxPrice,
-            [FromQuery] double? minRating)
+            [FromQuery] double? minRating,
+            [FromQuery] bool? onSale,
+            [FromQuery] bool? sortByDiscount)
         {
-            var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating };
+            var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating, OnSale = onSale, SortByDiscount = sortByDiscount };
             var result = _touristTourService.SearchAndFilterTours(filters);
             return Ok(result);
         }

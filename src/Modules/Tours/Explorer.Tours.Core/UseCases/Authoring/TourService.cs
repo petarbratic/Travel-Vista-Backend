@@ -16,12 +16,14 @@ public class TourService : ITourService, IInternalTourService
 {
     private readonly ITourRepository _tourRepository;
     private readonly IEquipmentRepository _equipmentRepository;
+    private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, ISaleRepository saleRepository, IMapper mapper)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
+        _saleRepository = saleRepository;
         _mapper = mapper;
     }
 
@@ -193,5 +195,18 @@ public class TourService : ITourService, IInternalTourService
                 .Distinct()
                 .ToList() ?? new List<int>()
         }).ToList();
+    }
+
+    public decimal GetDiscountedPrice(long tourId, decimal originalPrice)
+    {
+        var activeSales = _saleRepository.GetActiveSalesForTours(new List<long> { tourId });
+        var sale = activeSales.FirstOrDefault(s => s.TourIds.Contains(tourId));
+        
+        if (sale != null)
+        {
+            return originalPrice * (1 - sale.DiscountPercentage / 100);
+        }
+        
+        return originalPrice;
     }
 }

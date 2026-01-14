@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +50,20 @@ public class SaleDbRepository : ISaleRepository
         return _context.Sales
             .Where(s => s.AuthorId == authorId)
             .OrderByDescending(s => s.CreatedAt)
+            .ToList();
+    }
+
+    public List<Sale> GetActiveSalesForTours(List<long> tourIds)
+    {
+        var now = DateTime.UtcNow;
+        // Učitavamo sve aktivne sale u memoriju jer EF Core ne može da prevede Any() na JSON koloni
+        var activeSales = _context.Sales
+            .Where(s => s.StartDate <= now && s.EndDate >= now)
+            .ToList();
+        
+        // Filtrirati u memoriji
+        return activeSales
+            .Where(s => s.TourIds.Any(tid => tourIds.Contains(tid)))
             .ToList();
     }
 }

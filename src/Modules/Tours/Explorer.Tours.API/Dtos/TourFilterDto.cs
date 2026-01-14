@@ -16,4 +16,6 @@ public class TourFilterDto
     public decimal? MinPrice { get; set; }
     public decimal? MaxPrice { get; set; }
     public double? MinRating { get; set; } // 0-5
+    public bool? OnSale { get; set; }
+    public bool? SortByDiscount { get; set; }
 }
