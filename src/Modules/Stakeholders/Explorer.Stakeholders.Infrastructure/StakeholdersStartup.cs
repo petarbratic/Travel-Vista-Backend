@@ -1,4 +1,5 @@
 using Explorer.BuildingBlocks.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.Mappers;
@@ -36,6 +37,10 @@ public static class StakeholdersStartup
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IPreferenceService, PreferenceService>(); //preference
         services.AddScoped<ITouristEquipmentService, TouristEquipmentService>();  //oprema
+        services.AddScoped<IWalletService, WalletService>();
+        services.AddScoped<IInternalTouristXPAndLevelSerive, InternalTouristXPAndLevelService>();
+        services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
+        services.AddScoped<IInternalWalletService, WalletService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -50,6 +55,11 @@ public static class StakeholdersStartup
         services.AddScoped<IMeetupRepository, MeetupDbRepository>();
         services.AddScoped<IPreferenceRepository, PreferenceDbRepository>(); //preference
         services.AddScoped<ITouristRepository, TouristDbRepository>();  //oprema
+
+        services.AddScoped<IWalletRepository, WalletDbRepository>();
+
+        services.AddScoped<IClubJoinRequestRepository, ClubJoinRequestRepository>();
+        
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

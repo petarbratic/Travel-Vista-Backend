@@ -16,6 +16,7 @@ public class StakeholdersContext : DbContext
 
     
     public DbSet<Club> Clubs { get; set; }
+    public DbSet<ClubJoinRequest> ClubJoinRequests { get; set; }
     public DbSet<ClubImage> ClubImages { get; set; }
 
     public DbSet<Meetup> Meetups { get; set; }
@@ -23,6 +24,9 @@ public class StakeholdersContext : DbContext
     public DbSet<Preference> Preferences { get; set; }
 
     public DbSet<Tourist> Tourists { get; set; }
+
+    public DbSet<Wallet> Wallets { get; set; }
+
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,6 +48,33 @@ public class StakeholdersContext : DbContext
             .WithMany()
             .HasForeignKey(c => c.FeaturedImageId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ClubJoinRequest>()
+            .HasKey(r => r.Id);
+
+        modelBuilder.Entity<ClubJoinRequest>()
+            .HasIndex(r => new { r.TouristId, r.ClubId })
+            .IsUnique();
+
+        modelBuilder.Entity<Club>()
+            .Property(c => c.Status)
+            .HasConversion<int>();
+
+        modelBuilder.Entity<Club>()
+            .Property(c => c.MemberIds)
+            .HasConversion(
+                v => v == null || v.Count == 0 ? "" : string.Join(',', v),
+                v => string.IsNullOrWhiteSpace(v)
+                    ? new List<long>()
+                    : v.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                         .Select(long.Parse)
+                         .ToList()
+            )
+            .Metadata.SetValueComparer(new ValueComparer<List<long>>(
+                (c1, c2) => (c1 == null && c2 == null) || (c1 != null && c2 != null && c1.SequenceEqual(c2)),
+                c => c == null ? 0 : c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                c => c == null ? new List<long>() : c.ToList()
+            ));
 
 
         // Konfiguracija za Preferences
@@ -96,6 +127,14 @@ public class StakeholdersContext : DbContext
                     )
                 );
         });
+
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.HasKey(w => w.Id);
+            entity.HasIndex(w => w.PersonId).IsUnique();
+            entity.Property(w => w.BalanceAc).IsRequired();
+        });
+
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)

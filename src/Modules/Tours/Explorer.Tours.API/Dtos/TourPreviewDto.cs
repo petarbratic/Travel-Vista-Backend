@@ -9,7 +9,8 @@ public class TourPreviewDto
     public string Description { get; set; }
     public double Price { get; set; }
     public List<string> Tags { get; set; }
-    public string Difficulty { get; set; }
+    public int Difficulty { get; set; } //  promenjeno sa string na int
+
     public double AverageRating { get; set; }
     public KeyPointDto FirstKeyPoint { get; set; }
     public List<TourReviewDto> Reviews { get; set; }
@@ -20,4 +21,10 @@ public class TourPreviewDto
     public List<string> Images { get; set; }
 
     public int Status { get; set; } // za tour execution
+
+    // Sale properties
+    public bool OnSale { get; set; }
+    public double OriginalPrice { get; set; }
+    public double DiscountedPrice { get; set; }
+    public double DiscountPercentage { get; set; }
 }

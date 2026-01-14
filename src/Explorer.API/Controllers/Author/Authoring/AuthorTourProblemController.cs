@@ -1,5 +1,6 @@
 ﻿using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Tourist;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces; 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,10 +12,14 @@ namespace Explorer.API.Controllers.Author.Authoring;
 public class AuthorTourProblemController : ControllerBase
 {
     private readonly ITourProblemService _tourProblemService;
+    private readonly IPersonRepository _personRepository; 
 
-    public AuthorTourProblemController(ITourProblemService tourProblemService)
+    public AuthorTourProblemController(
+        ITourProblemService tourProblemService,
+        IPersonRepository personRepository) 
     {
         _tourProblemService = tourProblemService;
+        _personRepository = personRepository;
     }
 
     // Podtask 1
@@ -23,6 +28,13 @@ public class AuthorTourProblemController : ControllerBase
     {
         var authorId = GetAuthorId();
         var result = _tourProblemService.GetByAuthorId(authorId);
+        
+        // Popuni imena
+        foreach (var problem in result)
+        {
+            EnrichWithNames(problem);
+        }
+        
         return Ok(result);
     }
 
@@ -38,6 +50,9 @@ public class AuthorTourProblemController : ControllerBase
             return Forbid();
         }
 
+        // Popuni imena
+        EnrichWithNames(problem);
+
         return Ok(problem);
     }
 
@@ -46,7 +61,30 @@ public class AuthorTourProblemController : ControllerBase
     {
         var authorId = GetAuthorId();
         var result = _tourProblemService.AddMessage(id, authorId, dto.Content, 1); // 1 = Author
+        
+        // Popuni imena
+        EnrichWithNames(result);
+        
         return Ok(result);
+    }
+
+    // NOVA HELPER METODA
+    private void EnrichWithNames(TourProblemDto dto)
+    {
+        foreach (var message in dto.Messages)
+        {
+            var person = _personRepository.GetByUserId(message.AuthorId);
+            if (person != null)
+            {
+                message.SenderName = person.Name;
+                message.SenderSurname = person.Surname;
+            }
+            else
+            {
+                message.SenderName = "Unknown";
+                message.SenderSurname = "User";
+            }
+        }
     }
 
     // Helper metoda za ekstrakciju Author ID iz JWT tokena

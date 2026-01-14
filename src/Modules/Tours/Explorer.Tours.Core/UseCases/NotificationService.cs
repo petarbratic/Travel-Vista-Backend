@@ -1,12 +1,13 @@
 ﻿using AutoMapper;
 using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Tours.Core.UseCases;
 
-public class NotificationService : INotificationService
+public class NotificationService : INotificationService, IInternalNotificationService
 {
     private readonly INotificationRepository _notificationRepository;
     private readonly ITourProblemRepository _tourProblemRepository;
@@ -133,4 +134,46 @@ public class NotificationService : INotificationService
 
         return description.Substring(0, 50) + "...";
     }
+
+    public void CreateWalletTopUpNotification(long recipientId, int amountAc)
+    {
+        var notification = new Notification(
+            recipientId: recipientId,
+            type: NotificationType.WalletTopUp,
+            relatedEntityId: recipientId, 
+            message: $"Administrator added {amountAc} AC to your wallet."
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
+
+    public void CreateTourPurchaseNotification(long recipientId, long tourId, string tourName)
+    {
+        var notification = new Notification(
+            recipientId: recipientId,
+            type: NotificationType.TourPurchased,
+            relatedEntityId: tourId,
+            message: $"You have successfully purchased tour: {tourName}"
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
+    public void CreateBundlePurchaseNotification(long touristId, long bundleId, string bundleName)
+    {
+        var notification = new Notification(
+            recipientId: touristId,
+            type: NotificationType.BundlePurchase,
+            relatedEntityId: bundleId,
+            message: $"You purchased bundle '{bundleName}' successfully! Check your tours."
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
+
 }

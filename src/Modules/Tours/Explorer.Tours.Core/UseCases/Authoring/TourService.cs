@@ -8,19 +8,22 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.BuildingBlocks.Core.Exceptions;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Authoring;
 
-public class TourService : ITourService
+public class TourService : ITourService, IInternalTourService
 {
     private readonly ITourRepository _tourRepository;
     private readonly IEquipmentRepository _equipmentRepository;
+    private readonly ISaleRepository _saleRepository;
     private readonly IMapper _mapper;
 
-    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, IMapper mapper)
+    public TourService(ITourRepository repository, IEquipmentRepository equipmentRepository, ISaleRepository saleRepository, IMapper mapper)
     {
         _tourRepository = repository;
         _equipmentRepository = equipmentRepository;
+        _saleRepository = saleRepository;
         _mapper = mapper;
     }
 
@@ -52,10 +55,29 @@ public class TourService : ITourService
 
     public void Delete(long id, long authorId)
     {
-        var tour = _tourRepository.GetById(id);
+        var tour = _tourRepository.GetByIdWithKeyPoints(id);
         if (tour == null) throw new NotFoundException($"Tour with id {id} not found.");
         if (tour.AuthorId != authorId) throw new ForbiddenException("You can only delete your own tours.");
         if (tour.Status != TourStatus.Draft) throw new InvalidOperationException("Only tours in Draft status can be deleted.");
+
+        foreach (var kp in tour.KeyPoints)
+        {
+            if (string.IsNullOrWhiteSpace(kp.ImageUrl))
+                continue;
+
+            var fileName = Path.GetFileName(kp.ImageUrl);
+            var filePath = Path.Combine(
+                "wwwroot",
+                "uploads",
+                "keypoint-images",
+                fileName
+            );
+
+            if (System.IO.File.Exists(filePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+        }
 
         _tourRepository.Delete(id);
     }
@@ -153,5 +175,38 @@ public class TourService : ITourService
 
         var result = _tourRepository.Update(tour);
         return _mapper.Map<TourDto>(result);
+    }
+
+    public List<TourForRecommendationDto> GetPublishedToursForRecommendation()
+    {
+        var tours = _tourRepository.GetPublishedTours();
+
+        return tours.Select(t => new TourForRecommendationDto
+        {
+            Id = t.Id,
+            Name = t.Name,
+            Description = t.Description,
+            Difficulty = (int)t.Difficulty,
+            Price = t.Price,
+            DistanceInKm = t.DistanceInKm,
+            Tags = t.Tags ?? new List<string>(),
+            TransportationTypes = t.TourDurations?
+                .Select(td => (int)td.TransportType)
+                .Distinct()
+                .ToList() ?? new List<int>()
+        }).ToList();
+    }
+
+    public decimal GetDiscountedPrice(long tourId, decimal originalPrice)
+    {
+        var activeSales = _saleRepository.GetActiveSalesForTours(new List<long> { tourId });
+        var sale = activeSales.FirstOrDefault(s => s.TourIds.Contains(tourId));
+        
+        if (sale != null)
+        {
+            return originalPrice * (1 - sale.DiscountPercentage / 100);
+        }
+        
+        return originalPrice;
     }
 }

@@ -1,9 +1,12 @@
 using Explorer.Blog.Core.Domain;
+using Explorer.Blog.Core.Domain.Blogs;
 using Microsoft.EntityFrameworkCore;
 
 using BlogEntity = Explorer.Blog.Core.Domain.Blogs.Blog;
 using BlogImageEntity = Explorer.Blog.Core.Domain.Blogs.BlogImage;
 using BlogRating = Explorer.Blog.Core.Domain.Blogs.BlogRating;
+
+using Explorer.Blog.Core.Domain.Newsletter;
 
 namespace Explorer.Blog.Infrastructure.Database
 {
@@ -15,7 +18,13 @@ namespace Explorer.Blog.Infrastructure.Database
       
         public DbSet<BlogEntity> Blogs { get; set; }
         public DbSet<BlogImageEntity> BlogImages { get; set; }
+
+        public DbSet<Comment> Comments { get; set; }
+
+        public DbSet<NewsletterSubscriber> NewsletterSubscribers { get; set; }
+
         public DbSet<BlogRating> BlogRatings { get; set; }
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,10 +40,21 @@ namespace Explorer.Blog.Infrastructure.Database
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<BlogEntity>()
-                .HasMany(b => b.Ratings)
+
+                .HasMany(b => b.Comments)
                 .WithOne()
-                .HasForeignKey(r => r.BlogId)
+                .HasForeignKey(c => c.BlogId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<NewsletterSubscriber>()
+               .HasIndex(n => n.Email)
+               .IsUnique();
+
+            modelBuilder.Entity<NewsletterSubscriber>()
+                .Property(n => n.Email)
+                .IsRequired()
+                .HasMaxLength(320); // RFC standard
+
         }
     }
 }

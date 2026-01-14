@@ -33,8 +33,22 @@ namespace Explorer.API.Controllers.Tourist
             return Ok(tours);
         }
 
+        //Istaknute ture za neprijavljene korisnike
+        [HttpGet("highlighted")]
+        [AllowAnonymous]
+        public ActionResult<List<TourPreviewDto>> GetHighlightedTours([FromQuery] int count = 6)
+        {
+            var result = _touristTourService.GetPublishedTours()
+                .OrderByDescending(t => t.AverageRating)
+                .ThenByDescending(t => t.Reviews.Count)
+                .Take(count)
+                .ToList();
+            
+            return Ok(result);
+        }
 
         [HttpGet("{id}/preview")]
+        [AllowAnonymous] // Dodato da neprijavljeni mogu videti preview
         public ActionResult<TourPreviewDto> GetTourPreview(long id)
         {
             var result = _touristTourService.GetPreview(id);
@@ -69,6 +83,24 @@ namespace Explorer.API.Controllers.Tourist
                 return Forbid("Tour not purchased.");
 
             return Ok(new { message = "OK" });
+        }
+
+        // Endpoint za pretragu i filtriranje
+        [HttpGet("search")]
+        [AllowAnonymous]
+        public ActionResult<List<TourPreviewDto>> SearchTours(
+            [FromQuery] string? name,
+            [FromQuery] List<string>? tags,
+            [FromQuery] List<int>? difficulties,
+            [FromQuery] decimal? minPrice,
+            [FromQuery] decimal? maxPrice,
+            [FromQuery] double? minRating,
+            [FromQuery] bool? onSale,
+            [FromQuery] bool? sortByDiscount)
+        {
+            var filters = new TourFilterDto { Name = name, Tags = tags, Difficulties = difficulties, MinPrice = minPrice, MaxPrice = maxPrice, MinRating = minRating, OnSale = onSale, SortByDiscount = sortByDiscount };
+            var result = _touristTourService.SearchAndFilterTours(filters);
+            return Ok(result);
         }
 
         private long GetTouristId()

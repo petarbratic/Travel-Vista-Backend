@@ -22,6 +22,8 @@ public class StakeholderProfile : Profile
 
         // --- Dodao petar s. 
         CreateMap<Club, ClubDto>()
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.Status.ToString()))
+            .ForMember(dest => dest.MemberIds, opt => opt.MapFrom(src => src.MemberIds))
             .ForMember(dest => dest.FeaturedImage, opt => opt.MapFrom(src => src.FeaturedImage))
             .ForMember(dest => dest.GalleryImages, opt => opt.MapFrom(src => src.Images.Where(img => img.Id != src.FeaturedImageId).ToList()));
 
@@ -36,5 +38,8 @@ public class StakeholderProfile : Profile
         CreateMap<PreferenceDto, Preference>().ReverseMap(); //preference
         CreateMap<PreferenceCreateDto, Preference>();
         CreateMap<PreferenceUpdateDto, Preference>();
+
+        //luka s
+        CreateMap<ClubJoinRequestDto, ClubJoinRequest>().ReverseMap();
     }
 }

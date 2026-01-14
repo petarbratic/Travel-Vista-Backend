@@ -19,7 +19,7 @@ public class EquipmentController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize(Policy = "authorPolicy")]
+    [Authorize(Policy = "administratorOrAuthorPolicy")]
     public ActionResult<PagedResult<EquipmentDto>> GetAll([FromQuery] int page, [FromQuery] int pageSize)
     {
         return Ok(_equipmentService.GetPaged(page, pageSize));
@@ -27,7 +27,7 @@ public class EquipmentController : ControllerBase
 
     // DODATO - endpoint koji vraća svu opremu bez paginacije
     [HttpGet("all")]
-    [Authorize(Policy = "authorPolicy")]
+    [Authorize(Policy = "administratorOrAuthorPolicy")]
     public ActionResult<List<EquipmentDto>> GetAllEquipment()
     {
         return Ok(_equipmentService.GetAll());
