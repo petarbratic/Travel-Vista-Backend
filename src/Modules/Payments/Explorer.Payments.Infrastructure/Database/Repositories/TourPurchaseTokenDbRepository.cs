@@ -37,5 +37,10 @@ namespace Explorer.Payments.Infrastructure.Database.Repositories
             return _context.TourPurchaseTokens
                 .FirstOrDefault(t => t.Id == id);
         }
+        public int CountByTourIds(IEnumerable<long> tourIds)
+        {
+            var ids = tourIds.ToList();
+            return _context.TourPurchaseTokens.Count(t => ids.Contains(t.TourId));
+        }
     }
 }
