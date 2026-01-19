@@ -67,6 +67,7 @@ public static class ToursStartup
         services.AddScoped<IBundleService, BundleService>();
         services.AddScoped<ICouponService, CouponService>();
         services.AddScoped<ISaleService, SaleService>();
+        services.AddScoped<ITourWishlistService, TourWishlistService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -88,6 +89,7 @@ public static class ToursStartup
         services.AddScoped<IDiaryRepository, DiaryDbRepository>();
         services.AddScoped<ICouponRepository, CouponDbRepository>();
         services.AddScoped<ISaleRepository, SaleDbRepository>();
+        services.AddScoped<ITourWishlistRepository, TourWishlistDbRepository>();
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();

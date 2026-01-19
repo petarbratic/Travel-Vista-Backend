@@ -2,6 +2,7 @@
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
 using Explorer.Payments.Infrastructure.Database;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Tours.API.Public.Authoring;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -155,6 +156,97 @@ public class BundlePurchaseCommandTests : BasePaymentsIntegrationTest
         // Proveri da su oba tokena validni GUID-ovi
         Guid.TryParse(result.Tokens[0].Token, out _).ShouldBeTrue();
         Guid.TryParse(result.Tokens[1].Token, out _).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void PurchaseBundle_deducts_correct_amount_from_wallet()
+    {
+        // Arrange
+        var personId = NewPersonId();
+        var bundleId = -3; // Bundle sa cenom 200 AC
+
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateBundlePurchaseController(scope, personId);
+        var walletService = scope.ServiceProvider.GetRequiredService<IInternalWalletService>();
+        
+        var initialBalance = walletService.GetWallet(long.Parse(personId)).BalanceAc;
+
+        // Act
+        var actionResult = controller.PurchaseBundle(bundleId);
+        var okResult = actionResult as OkObjectResult;
+
+        // Assert
+        okResult.ShouldNotBeNull();
+        var result = okResult.Value as BundlePurchaseResultDto;
+        result.ShouldNotBeNull();
+        result.Success.ShouldBeTrue();
+        
+        // Proveri da je wallet umanjen za cenu bundle-a
+        var finalBalance = walletService.GetWallet(long.Parse(personId)).BalanceAc;
+        finalBalance.ShouldBe(initialBalance - 200);
+    }
+
+    [Fact]
+    public void PurchaseBundle_creates_correct_number_of_tokens()
+    {
+        // Arrange
+        var personId = NewPersonId();
+        var bundleId = -1; // Bundle sa 2 ture
+
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateBundlePurchaseController(scope, personId);
+        var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        // Act
+        var actionResult = controller.PurchaseBundle(bundleId);
+        var okResult = actionResult as OkObjectResult;
+
+        // Assert
+        okResult.ShouldNotBeNull();
+        var result = okResult.Value as BundlePurchaseResultDto;
+        result.ShouldNotBeNull();
+        result.Success.ShouldBeTrue();
+        
+        // Proveri da su kreirana 2 tokena (po jedna za svaku turu)
+        result.Tokens.Count.ShouldBe(2);
+        
+        // Proveri da su tokeni u bazi
+        var tokensInDb = db.TourPurchaseTokens
+            .Where(t => t.TouristId == long.Parse(personId))
+            .ToList();
+        tokensInDb.Count.ShouldBeGreaterThanOrEqualTo(2);
+    }
+
+    [Fact]
+    public void PurchaseBundle_sets_correct_purchase_timestamp()
+    {
+        // Arrange
+        var personId = NewPersonId();
+        var bundleId = -3; // Bundle sa cenom 200 AC
+        var beforePurchase = DateTime.UtcNow;
+
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateBundlePurchaseController(scope, personId);
+        var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+
+        // Act
+        var actionResult = controller.PurchaseBundle(bundleId);
+        var okResult = actionResult as OkObjectResult;
+        var afterPurchase = DateTime.UtcNow;
+
+        // Assert
+        okResult.ShouldNotBeNull();
+        var result = okResult.Value as BundlePurchaseResultDto;
+        result.ShouldNotBeNull();
+        result.Success.ShouldBeTrue();
+        
+        // Proveri timestamp u purchase record-u
+        var recordInDb = db.BundlePurchaseRecords
+            .FirstOrDefault(r => r.TouristId == long.Parse(personId) && r.BundleId == bundleId);
+        
+        recordInDb.ShouldNotBeNull();
+        recordInDb.PurchasedAt.ShouldBeGreaterThanOrEqualTo(beforePurchase);
+        recordInDb.PurchasedAt.ShouldBeLessThanOrEqualTo(afterPurchase);
     }
 
     private static BundlePurchaseController CreateBundlePurchaseController(IServiceScope scope, string personId)
