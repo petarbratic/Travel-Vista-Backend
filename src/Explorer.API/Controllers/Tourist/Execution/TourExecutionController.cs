@@ -1,4 +1,5 @@
 ﻿using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.API.Public.Execution;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,10 +12,12 @@ namespace Explorer.API.Controllers.Tourist.Execution;
 public class TourExecutionController : ControllerBase
 {
     private readonly ITourExecutionService _tourExecutionService;
+    private readonly ITourService _tourService;
 
-    public TourExecutionController(ITourExecutionService tourExecutionService)
+    public TourExecutionController(ITourExecutionService tourExecutionService, ITourService tourService)
     {
         _tourExecutionService = tourExecutionService;
+        _tourService = tourService;
     }
 
     [HttpPost("start")]
@@ -43,6 +46,21 @@ public class TourExecutionController : ControllerBase
             return Ok(null);
 
         return Ok(activeTourExecution);
+    }
+
+    [HttpGet("active/{touristId:long}")]
+    public ActionResult<TourDto> GetActiveTourByTouristId(long touristId)
+    {
+        var activeTourExecution = _tourExecutionService.GetActiveTourExecution(touristId);
+
+        if (activeTourExecution == null)
+            return Ok(null);
+
+        var activeTour = _tourService.GetById(activeTourExecution.TourId);
+        if (activeTour == null)
+            return Ok(null);
+
+        return Ok(activeTour);
     }
 
     [HttpGet("active-with-next-keypoint")]
