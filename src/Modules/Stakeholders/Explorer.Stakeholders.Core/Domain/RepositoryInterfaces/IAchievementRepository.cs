@@ -6,7 +6,10 @@ using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces
 {
-    internal class IAchievementRepository
+    public interface IAchievementRepository
     {
+        Achievement Create(Achievement achievement);
+        bool Has(long touristId, AchievementCode code);
+        IReadOnlyList<Achievement> GetByTouristId(long touristId);
     }
 }

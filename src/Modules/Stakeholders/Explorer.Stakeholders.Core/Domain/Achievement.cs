@@ -26,7 +26,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public AchievementCode Code { get; private set; }
         public DateTime AwardedAtUtc { get; private set; }
 
-        public Achievement() { }
+        private Achievement() { }
 
         public Achievement(long touristId, AchievementCode code)
         {
@@ -34,13 +34,6 @@ namespace Explorer.Stakeholders.Core.Domain
             TouristId = touristId;
             Code = code;
             AwardedAtUtc = DateTime.UtcNow;
-        }
-
-        public void Update(long touristId, AchievementCode code)
-        {
-            if (touristId == 0) throw new ArgumentException("Invalid TouristId.");
-            TouristId = touristId;
-            Code = code;
         }
     }
 }
