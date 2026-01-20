@@ -41,5 +41,13 @@ public class StakeholderProfile : Profile
 
         //luka s
         CreateMap<ClubJoinRequestDto, ClubJoinRequest>().ReverseMap();
+
+        CreateMap<Achievement, AchievementDto>()
+            .ForMember(d => d.Code, opt => opt.MapFrom(s => s.Code.ToString()))
+            .ForMember(d => d.Name, opt => opt.Ignore())
+            .ForMember(d => d.Description, opt => opt.Ignore());
+        CreateMap<XpEvent, XpEventDto>()
+            .ForMember(d => d.Type, opt => opt.MapFrom(s => s.Type.ToString()))
+            .ForMember(d => d.Description, opt => opt.Ignore());
     }
 }
