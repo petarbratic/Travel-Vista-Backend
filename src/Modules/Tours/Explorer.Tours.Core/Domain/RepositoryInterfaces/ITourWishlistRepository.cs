@@ -8,4 +8,6 @@ public interface ITourWishlistRepository
     TourWishlist? GetByTouristAndTour(long touristId, long tourId);
     List<TourWishlist> GetAllForTourist(long touristId);
     bool IsInWishlist(long touristId, long tourId);
+    List<long> GetTouristIdsForTour(long tourId);
+
 }
