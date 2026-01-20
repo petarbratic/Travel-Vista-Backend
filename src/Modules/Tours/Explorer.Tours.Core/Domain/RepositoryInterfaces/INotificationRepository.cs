@@ -9,4 +9,6 @@ public interface INotificationRepository
     int MarkAllAsReadByRecipientId(long recipientId);
     List<Notification> GetByRecipientIdPaginated(long recipientId, int page, int pageSize, out int totalCount);
     Notification Update(Notification notification);
+    bool Exists(long recipientId, NotificationType type, long relatedEntityId);
+
 }

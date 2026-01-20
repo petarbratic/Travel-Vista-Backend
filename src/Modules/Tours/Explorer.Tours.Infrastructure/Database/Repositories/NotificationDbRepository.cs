@@ -74,4 +74,12 @@ public class NotificationDbRepository : INotificationRepository
         _context.SaveChanges();
         return notification;
     }
+
+    public bool Exists(long recipientId, NotificationType type, long relatedEntityId)
+    {
+        return _context.Notifications.Any(n =>
+            n.RecipientId == recipientId &&
+            n.Type == type &&
+            n.RelatedEntityId == relatedEntityId);
+    }
 }
