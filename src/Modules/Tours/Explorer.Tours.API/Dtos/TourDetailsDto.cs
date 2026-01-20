@@ -9,5 +9,6 @@ namespace Explorer.Tours.API.Dtos
     public class TourDetailsDto : TourPreviewDto
     {
         public List<KeyPointPublicDto> KeyPoints { get; set; }
+        public List<EquipmentDto> Equipment { get; set; }
     }
 }
