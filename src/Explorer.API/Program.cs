@@ -7,6 +7,7 @@ using Explorer.Payments.Infrastructure;
 using Explorer.Tours.API.Public;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
+using Explorer.API.Services;
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
@@ -39,8 +40,9 @@ builder.Services.ConfigureBlogModule();
 builder.Services.ConfigurePaymentsModule();
 builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
-builder.Services.RegisterModules();
 
+builder.Services.RegisterModules();
+builder.Services.AddScoped<IAuthorProfileQueryService, AuthorProfileQueryService>();
 builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 
 // =======================
