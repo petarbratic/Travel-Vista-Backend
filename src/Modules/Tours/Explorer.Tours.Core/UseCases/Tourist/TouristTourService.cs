@@ -177,6 +177,11 @@ public class TouristTourService : ITouristTourService
         // MAP IRRELEVANT FIELDS
         var preview = _mapper.Map<TourDetailsDto>(tour);
 
+        if (tour.Equipment != null)
+        {
+            preview.Equipment = tour.Equipment.Select(e => _mapper.Map<EquipmentDto>(e)).ToList();
+        }
+
         // LENGTH
         preview.Length = tour.DistanceInKm;
 

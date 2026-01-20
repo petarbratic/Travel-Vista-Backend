@@ -147,6 +147,7 @@ public class TourDbRepository : ITourRepository
     {
         // TourDurations je automatski učitan jer je deo Tour agregata
         return _context.Tours
+            .Include(t => t.Equipment)
             .Where(t => t.Status == TourStatus.Published)
             .ToList();
     }
