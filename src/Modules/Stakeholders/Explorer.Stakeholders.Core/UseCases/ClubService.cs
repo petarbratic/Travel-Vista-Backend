@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -16,11 +16,13 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly IClubRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IFirstTimeXpService _firstTimeXpService;
 
-        public ClubService(IClubRepository repository, IMapper mapper)
+        public ClubService(IClubRepository repository, IMapper mapper, IFirstTimeXpService firstTimeXpService)
         {
             _repository = repository;
             _mapper = mapper;
+            _firstTimeXpService = firstTimeXpService;
         }
 
         public PagedResult<ClubDto> GetPaged(int page, int pageSize)
@@ -168,8 +170,19 @@ namespace Explorer.Stakeholders.Core.UseCases
             if (club == null) throw new KeyNotFoundException("Club not found.");
             if (club.OwnerId != userId) throw new UnauthorizedAccessException("Not the owner.");
 
+            // Proveri da li je ovo prvi klub za ovog turista
+            var isFirstClub = !club.MemberIds.Contains(touristId); // ili proveri na drugi način
+
             club.AddMember(touristId);
-            return _mapper.Map<ClubDto>(_repository.Update(club));
+            var updated = _repository.Update(club);
+
+            //Award XP za prvi klub
+            if (isFirstClub)
+            {
+                _firstTimeXpService.TryAwardFirstClubJoin(touristId, clubId);
+            }
+
+            return _mapper.Map<ClubDto>(updated);
         }
 
         public ClubDto KickMember(long clubId, long memberId, long userId)

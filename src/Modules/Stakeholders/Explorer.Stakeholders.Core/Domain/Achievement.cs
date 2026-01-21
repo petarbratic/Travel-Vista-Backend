@@ -1,9 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
@@ -17,7 +12,12 @@ namespace Explorer.Stakeholders.Core.Domain
         TenClubsJoined,
         FirstReviewWritten,
         FiveReviewsWritten,
-        TenReviewsWritten
+        TenReviewsWritten,
+
+        //First-time achievements
+        FirstProfilePictureSet,
+        FirstAppReview,
+        FirstBlogCreated
     }
 
     public class Achievement : Entity
@@ -37,4 +37,3 @@ namespace Explorer.Stakeholders.Core.Domain
         }
     }
 }
-

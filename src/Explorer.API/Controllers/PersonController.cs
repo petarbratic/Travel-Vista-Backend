@@ -1,5 +1,5 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,9 +13,9 @@ namespace Explorer.API.Controllers;
 public class PersonController : ControllerBase
 {
     private readonly IPersonService _personService;
-    private readonly IInternalTouristXPAndLevelSerive _touristXpService;
+    private readonly ITouristXPService _touristXpService;
 
-    public PersonController(IPersonService personService, IInternalTouristXPAndLevelSerive touristXpService)
+    public PersonController(IPersonService personService, ITouristXPService touristXpService)
     {
         _personService = personService;
         _touristXpService = touristXpService;

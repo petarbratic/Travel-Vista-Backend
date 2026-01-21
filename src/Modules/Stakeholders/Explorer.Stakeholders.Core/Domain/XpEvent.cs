@@ -1,9 +1,4 @@
 ﻿using Explorer.BuildingBlocks.Core.Domain;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.Domain
 {
@@ -11,7 +6,12 @@ namespace Explorer.Stakeholders.Core.Domain
     {
         TourCompleted,
         ClubJoined,
-        ReviewWritten
+        ReviewWritten,
+        //First-time akcije
+        FirstProfilePictureSet,
+        FirstAppReview,
+        FirstClubJoined,
+        FirstBlogCreated
     }
 
     public class XpEvent : Entity
@@ -20,7 +20,7 @@ namespace Explorer.Stakeholders.Core.Domain
         public XpEventType Type { get; private set; }
         public int Amount { get; private set; }
         public DateTime CreatedAtUtc { get; private set; }
-        public long SourceEntityId { get; private set; } // da se ne bi desilo dupliranje xp-a
+        public long SourceEntityId { get; private set; }
 
         private XpEvent() { }
 
@@ -28,7 +28,8 @@ namespace Explorer.Stakeholders.Core.Domain
         {
             if (touristId == 0) throw new ArgumentException("Invalid TouristId.");
             if (amount <= 0) throw new ArgumentException("Amount must be > 0.");
-            if(sourceEntityId == 0) throw new ArgumentException("Invalid SourceEntityId.");
+            if (sourceEntityId == 0) throw new ArgumentException("Invalid SourceEntityId.");
+
             TouristId = touristId;
             Type = type;
             Amount = amount;
@@ -37,5 +38,3 @@ namespace Explorer.Stakeholders.Core.Domain
         }
     }
 }
-
-
