@@ -107,4 +107,13 @@ public class MeetupService : IMeetupService
 
         return meetups.Select(m => _mapper.Map<MeetupDto>(m)).ToList();
     }
+
+    public List<MeetupMapPreviewDto> GetMapLocations()
+    {
+        var meetups = _meetupRepository.GetAll()
+                        .Where(m => m.DateTime > DateTime.UtcNow)
+                        .ToList();
+
+        return meetups.Select(m => _mapper.Map<MeetupMapPreviewDto>(m)).ToList();
+    }
 }
