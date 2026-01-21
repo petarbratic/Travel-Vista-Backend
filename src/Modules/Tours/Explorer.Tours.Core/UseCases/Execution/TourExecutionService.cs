@@ -10,6 +10,7 @@ using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.API.Internal;
+using Explorer.Stakeholders.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -26,6 +27,8 @@ public class TourExecutionService : ITourExecutionService
     //private readonly IShoppingCartService _shoppingCartService;
     private readonly IInternalShoppingCartService _shoppingCartService;
 
+    private readonly IInternalXpEventService _xpEventService;
+
     private readonly IMapper _mapper;
 
     public TourExecutionService(
@@ -40,6 +43,8 @@ public class TourExecutionService : ITourExecutionService
         //IShoppingCartService shoppingCartService,
         IInternalShoppingCartService shoppingCartService,
 
+        IInternalXpEventService xpEventService,
+
         IMapper mapper)
     {
         _executionRepository = executionRepository;
@@ -52,6 +57,8 @@ public class TourExecutionService : ITourExecutionService
         
         //_shoppingCartService = shoppingCartService;
         _shoppingCartService = shoppingCartService;
+
+        _xpEventService = xpEventService;
 
         _mapper = mapper;
     }
@@ -190,6 +197,9 @@ public class TourExecutionService : ITourExecutionService
         //  AKO SU SVE KOMPLETIRANE, DOZVOLI COMPLETE
         activeExecution.Complete();
         var updated = _executionRepository.Update(activeExecution);
+
+        _xpEventService.CreateTourCompletedXp(touristId, updated.Id, 50);
+
         return _mapper.Map<TourExecutionDto>(updated);
     }
 

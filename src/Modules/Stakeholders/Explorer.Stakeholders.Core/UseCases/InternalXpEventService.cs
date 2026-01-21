@@ -21,7 +21,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             _internalTouristXPAndLevelSerive = internalTouristXPAndLevelSerive;
         }
 
-        public void CreateXpEvent(long touristId, long tourId, int amount)
+        public void CreateTourReviewXp(long touristId, long tourId, int amount)
         {
             // best effort + idempotentnost je u XpEventService (Exists check)
             try
@@ -31,6 +31,48 @@ namespace Explorer.Stakeholders.Core.UseCases
                     SourceEntityId = tourId,
                     Amount = amount,
                     Type = XpEventType.TourReviewWritten.ToString()
+                };
+
+                _xpEventService.Create(dto, touristId);
+                _internalTouristXPAndLevelSerive.AddExperience(touristId, dto.Amount);
+            }
+            catch (InvalidOperationException)
+            {
+                // duplikat -> ignoriši
+            }
+
+        }
+        public void BuyTourXp(long touristId, long tourId, int amount)
+        {
+            // best effort + idempotentnost je u XpEventService (Exists check)
+            try
+            {
+                var dto = new XpEventDto
+                {
+                    SourceEntityId = tourId,
+                    Amount = amount,
+                    Type = XpEventType.TourBought.ToString()
+                };
+
+                _xpEventService.Create(dto, touristId);
+                _internalTouristXPAndLevelSerive.AddExperience(touristId, dto.Amount);
+            }
+            catch (InvalidOperationException)
+            {
+                // duplikat -> ignoriši
+            }
+
+        }
+        public void CreateTourCompletedXp(long touristId, long tourId, int amount)
+        {
+            // best effort + idempotentnost je u XpEventService (Exists check)
+            try
+            {
+                var dto = new XpEventDto
+                {
+                    SourceEntityId = tourId,
+                    Amount = amount,
+                    Type = XpEventType.TourCompleted.ToString()
                 };
 
                 _xpEventService.Create(dto, touristId);

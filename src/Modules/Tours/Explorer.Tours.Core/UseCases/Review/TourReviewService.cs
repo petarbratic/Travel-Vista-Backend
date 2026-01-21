@@ -99,7 +99,7 @@ public class TourReviewService : ITourReviewService
 
         var created = _reviewRepository.Create(review);
 
-        _internalXpEventService.CreateXpEvent(touristId, created.TourId, 20);
+        _internalXpEventService.CreateTourReviewXp(touristId, created.TourId, 20);
 
         return MapReviewToDto(created);
     }

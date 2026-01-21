@@ -122,7 +122,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                     var record = new TourPurchaseRecord(touristId, item.TourId, item.Price);
                     var createdRecord = _recordRepository.Create(record);
 
-                    _internalXpEventService.CreateXpEvent(touristId, item.TourId, 20);
+                    _internalXpEventService.BuyTourXp(touristId, item.TourId, 20);
 
                     Console.WriteLine($"    Record created: ID={createdRecord.Id}");
 
@@ -168,8 +168,6 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                     Console.WriteLine("    Creating bundle record...");
                     var bundleRecord = new BundlePurchaseRecord(touristId, bundleItem.BundleId, bundleItem.Price);
                     var createdBundleRecord = _bundlePurchaseRecordRepository.Create(bundleRecord);
-
-
                     Console.WriteLine($"    Bundle record created: ID={createdBundleRecord.Id}");
 
                     // ✅ Add to bundleRecordDtos list
