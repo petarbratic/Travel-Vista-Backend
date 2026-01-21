@@ -1,4 +1,4 @@
-﻿// src/Modules/Payments/Explorer.Payments.Core/UseCases/Shopping/TourPurchaseTokenService.cs
+// src/Modules/Payments/Explorer.Payments.Core/UseCases/Shopping/TourPurchaseTokenService.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +24,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
         private readonly IBundlePurchaseRecordRepository _bundlePurchaseRecordRepository;
         private readonly IInternalBundleService _bundleService;
         private readonly IInternalXpEventService _internalXpEventService;
+        private readonly IInternalWelcomeBonusService _welcomeBonusService;
         private readonly IMapper _mapper;
 
         public TourPurchaseTokenService(
@@ -36,6 +37,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             IInternalTourService tourService,
             IInternalBundleService bundleService,
             IInternalXpEventService xpEventService,
+            IInternalWelcomeBonusService welcomeBonusService,
             IMapper mapper)
         {
             _cartRepository = cartRepository;
@@ -47,6 +49,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             _tourService = tourService;
             _bundleService = bundleService;
             _internalXpEventService = xpEventService;
+            _welcomeBonusService = welcomeBonusService;
             _mapper = mapper;
         }
 
@@ -73,28 +76,55 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                 }
                 Console.WriteLine($"[SUCCESS] Cart has {cart.Items.Count} tour items and {cart.BundleItems.Count} bundle items, Total: {cart.TotalPrice} AC");
 
-                Console.WriteLine("[2/8] Getting wallet...");
+                // Proveri da li postoji aktivni popust bonus
+                Console.WriteLine("[2/8] Checking for welcome bonus discount...");
+                var discountBonus = _welcomeBonusService.GetActiveDiscountBonus(touristId);
+                decimal finalPrice = cart.TotalPrice;
+                decimal discountAmount = 0;
+                
+                if (discountBonus != null)
+                {
+                    discountAmount = cart.TotalPrice * (discountBonus.Value / 100m);
+                    finalPrice = cart.TotalPrice - discountAmount;
+                    Console.WriteLine($"[SUCCESS] Welcome bonus discount applied: {discountBonus.Value}% (saved {discountAmount:F2} AC)");
+                }
+                else
+                {
+                    Console.WriteLine("[INFO] No active discount bonus found");
+                }
+
+                Console.WriteLine($"[INFO] Original price: {cart.TotalPrice} AC, Final price: {finalPrice:F2} AC");
+
+                Console.WriteLine("[3/8] Getting wallet...");
                 var wallet = _walletService.GetWallet(touristId);
                 Console.WriteLine($"[SUCCESS] Wallet balance: {wallet.BalanceAc} AC");
 
-                if (wallet.BalanceAc < cart.TotalPrice)
+                if (wallet.BalanceAc < finalPrice)
                 {
                     Console.WriteLine($"[ERROR] Insufficient funds");
                     return new CheckoutResultDto
                     {
                         Success = false,
-                        Message = $"Insufficient Adventure Coins. You need {(cart.TotalPrice - wallet.BalanceAc)} more AC.",
+                        Message = $"Insufficient Adventure Coins. You need {(finalPrice - wallet.BalanceAc):F2} more AC.",
                         Tokens = new List<TourPurchaseTokenDto>(),
                         PurchaseRecords = new List<TourPurchaseRecordDto>(),
                         BundlePurchaseRecords = new List<BundlePurchaseRecordDto>()
                     };
                 }
 
-                Console.WriteLine("[3/8] Deducting AC...");
-                _walletService.DeductAc(touristId, cart.TotalPrice);
-                Console.WriteLine($"[SUCCESS] Deducted {cart.TotalPrice} AC");
+                Console.WriteLine("[4/8] Deducting AC...");
+                _walletService.DeductAc(touristId, finalPrice);
+                Console.WriteLine($"[SUCCESS] Deducted {finalPrice:F2} AC");
 
-                Console.WriteLine("[4/8] Creating tokens and records...");
+                // Označi bonus kao iskorišćen ako je primenjen popust
+                if (discountBonus != null)
+                {
+                    Console.WriteLine("[4.5/8] Marking welcome bonus as used...");
+                    _welcomeBonusService.MarkBonusAsUsed(touristId);
+                    Console.WriteLine("[SUCCESS] Welcome bonus marked as used");
+                }
+
+                Console.WriteLine("[5/8] Creating tokens and records...");
                 var tokenDtos = new List<TourPurchaseTokenDto>();
                 var recordDtos = new List<TourPurchaseRecordDto>();
                 var bundleRecordDtos = new List<BundlePurchaseRecordDto>(); // ✅ NOVA LISTA
