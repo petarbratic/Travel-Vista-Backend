@@ -5,6 +5,7 @@ using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Review;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Review;
 
@@ -14,16 +15,19 @@ public class TourReviewService : ITourReviewService
     private readonly ITourExecutionRepository _executionRepository;
     private readonly IMapper _mapper;
     private readonly ITourRepository _tourRepository;
+    private readonly IInternalXpEventService _internalXpEventService;
 
     public TourReviewService(
-        ITourReviewRepository reviewRepository,
-        ITourExecutionRepository executionRepository,
-        ITourRepository tourRepository,
-        IMapper mapper)
+    ITourReviewRepository reviewRepository,
+    ITourExecutionRepository executionRepository,
+    ITourRepository tourRepository,
+    IInternalXpEventService internalXpEventService,
+    IMapper mapper)
     {
         _reviewRepository = reviewRepository;
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
+        _internalXpEventService = internalXpEventService;
         _mapper = mapper;
     }
 
@@ -94,6 +98,9 @@ public class TourReviewService : ITourReviewService
         );
 
         var created = _reviewRepository.Create(review);
+
+        _internalXpEventService.CreateTourReviewXp(touristId, created.TourId, 20);
+
         return MapReviewToDto(created);
     }
 
