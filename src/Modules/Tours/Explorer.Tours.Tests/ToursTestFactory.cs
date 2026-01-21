@@ -136,7 +136,7 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
         if (existingXp != null) services.Remove(existingXp);
 
         var xpMock = new Mock<IInternalXpEventService>();
-        xpMock.Setup(x => x.CreateTourReviewXp(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<int>()));
+        xpMock.Setup(x => x.CreateXpEvent(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<int>()));
 
         services.AddScoped<IInternalXpEventService>(_ => xpMock.Object);
 

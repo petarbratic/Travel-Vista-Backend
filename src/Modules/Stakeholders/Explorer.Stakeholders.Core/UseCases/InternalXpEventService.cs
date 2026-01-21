@@ -13,13 +13,15 @@ namespace Explorer.Stakeholders.Core.UseCases
     public class InternalXpEventService : IInternalXpEventService
     {
         private readonly IXpEventService _xpEventService;
+        private readonly IInternalTouristXPAndLevelSerive _internalTouristXPAndLevelSerive;
 
-        public InternalXpEventService(IXpEventService xpEventService)
+        public InternalXpEventService(IXpEventService xpEventService, IInternalTouristXPAndLevelSerive internalTouristXPAndLevelSerive)
         {
             _xpEventService = xpEventService;
+            _internalTouristXPAndLevelSerive = internalTouristXPAndLevelSerive;
         }
 
-        public void CreateTourReviewXp(long touristId, long tourId, int amount)
+        public void CreateXpEvent(long touristId, long tourId, int amount)
         {
             // best effort + idempotentnost je u XpEventService (Exists check)
             try
@@ -32,11 +34,13 @@ namespace Explorer.Stakeholders.Core.UseCases
                 };
 
                 _xpEventService.Create(dto, touristId);
+                _internalTouristXPAndLevelSerive.AddExperience(touristId, dto.Amount);
             }
             catch (InvalidOperationException)
             {
                 // duplikat -> ignoriši
             }
+
         }
     }
 }

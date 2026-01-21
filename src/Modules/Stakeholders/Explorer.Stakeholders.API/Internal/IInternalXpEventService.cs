@@ -8,6 +8,6 @@ namespace Explorer.Stakeholders.API.Internal
 {
     public interface IInternalXpEventService
     {
-        void CreateTourReviewXp(long touristId, long tourId, int amount);
+        void CreateXpEvent(long touristId, long tourId, int amount);
     }
 }
