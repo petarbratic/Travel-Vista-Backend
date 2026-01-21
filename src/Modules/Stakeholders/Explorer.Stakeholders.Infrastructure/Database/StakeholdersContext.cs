@@ -139,7 +139,7 @@ public class StakeholdersContext : DbContext
             entity.Property(w => w.BalanceAc).IsRequired();
         });
 
-<<<<<<< HEAD
+
 
         modelBuilder.Entity<XpEvent>(entity =>
         {
@@ -191,7 +191,6 @@ public class StakeholdersContext : DbContext
         });
 
 
-=======
         modelBuilder.Entity<WelcomeBonus>(entity =>
         {
             entity.HasKey(wb => wb.Id);
@@ -204,7 +203,7 @@ public class StakeholdersContext : DbContext
             entity.Property(wb => wb.UsedAt).IsRequired(false);
         });
 
->>>>>>> development
+
     }
 
     private static void ConfigureStakeholder(ModelBuilder modelBuilder)
