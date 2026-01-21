@@ -62,4 +62,11 @@ public class TouristMeetupController : ControllerBase
         _meetupService.Delete(id, creatorId);
         return Ok();
     }
+
+    [HttpGet("map-locations")]
+    public ActionResult<List<MeetupMapPreviewDto>> GetMapLocations()
+    {
+        var result = _meetupService.GetMapLocations();
+        return Ok(result);
+    }
 }
