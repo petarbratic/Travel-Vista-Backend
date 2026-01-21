@@ -20,7 +20,7 @@ public class AuthenticationService : IAuthenticationService
         IPersonRepository personRepository,
         ITokenGenerator tokenGenerator,
         IWalletRepository walletRepository,
-        IWalletRepository walletRepository,
+        IWelcomeBonusService welcomeBonusService,
         ITouristRepository touristRepository)
     {
         _tokenGenerator = tokenGenerator;
