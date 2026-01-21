@@ -66,10 +66,23 @@ namespace Explorer.Stakeholders.Core.UseCases
         {
             return type switch
             {
-                XpEventType.TourCompleted => $"+{amount} XP - Tour completed",
-                XpEventType.ClubJoined => $"+{amount} XP - Club joined",
-                XpEventType.ReviewWritten => $"+{amount} XP - Review written",
-                _ => $"+{amount} XP"
+                XpEventType.TourCompleted =>
+                    $"+{amount} XP - Tour completed",
+
+                XpEventType.ClubJoined =>
+                    $"+{amount} XP - Club joined",
+
+                XpEventType.TourReviewWritten =>
+                    $"+{amount} XP - Tour review written",
+
+                XpEventType.AppReviewWritten =>
+                    $"+{amount} XP - App review written",
+
+                XpEventType.TourBought =>
+                    $"+{amount} XP - Tour purchased",
+
+                _ =>
+                    $"+{amount} XP"
             };
         }
     }

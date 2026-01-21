@@ -1,4 +1,4 @@
-﻿using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -29,6 +29,7 @@ public class StakeholdersContext : DbContext
 
     public DbSet<XpEvent> XpEvents { get; set; }
     public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<WelcomeBonus> WelcomeBonuses { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -139,6 +140,7 @@ public class StakeholdersContext : DbContext
         });
 
 
+
         modelBuilder.Entity<XpEvent>(entity =>
         {
             entity.HasKey(e => e.Id);
@@ -186,6 +188,19 @@ public class StakeholdersContext : DbContext
 
             // Za listanje bedževa
             entity.HasIndex(a => new { a.TouristId, a.AwardedAtUtc });
+        });
+
+
+        modelBuilder.Entity<WelcomeBonus>(entity =>
+        {
+            entity.HasKey(wb => wb.Id);
+            entity.HasIndex(wb => wb.PersonId).IsUnique();
+            entity.Property(wb => wb.BonusType).IsRequired();
+            entity.Property(wb => wb.Value).IsRequired();
+            entity.Property(wb => wb.IsUsed).IsRequired();
+            entity.Property(wb => wb.CreatedAt).IsRequired();
+            entity.Property(wb => wb.ExpiresAt).IsRequired();
+            entity.Property(wb => wb.UsedAt).IsRequired(false);
         });
 
 

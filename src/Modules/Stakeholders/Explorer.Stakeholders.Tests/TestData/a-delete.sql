@@ -1,4 +1,5 @@
-﻿DELETE FROM stakeholders."ClubJoinRequests";
+DELETE FROM stakeholders."ClubJoinRequests";
+DELETE FROM stakeholders."WelcomeBonuses";
 DELETE FROM stakeholders."Wallets";
 DELETE FROM stakeholders."Meetups";
 DELETE FROM stakeholders."People";
