@@ -71,6 +71,14 @@ namespace Explorer.Stakeholders.Core.UseCases
                 AchievementCode.TenClubsJoined =>
                     ("Ten Clubs Joined", "You have joined 10 clubs."),
 
+                AchievementCode.FirstReviewWritten =>
+                    ("First Review Written", "You have written your first review."),
+
+                AchievementCode.FiveReviewsWritten =>
+                    ("Five Reviews Written", "You have written 5 reviews."),
+
+                AchievementCode.TenReviewsWritten =>
+                    ("Ten Reviews Written", "You have written 10 reviews."),
                 AchievementCode.FirstTourReviewWritten =>
                     ("First Tour Review Written", "You have written your first tour review."),
 

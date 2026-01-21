@@ -1,14 +1,14 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
-using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 namespace Explorer.Stakeholders.Core.UseCases;
 
-public class InternalTouristXPAndLevelService : IInternalTouristXPAndLevelSerive
+public class TouristXPService : ITouristXPService
 {
     private readonly ITouristRepository _touristRepository;
 
-    public InternalTouristXPAndLevelService(ITouristRepository touristRepository)
+    public TouristXPService(ITouristRepository touristRepository)
     {
         _touristRepository = touristRepository;
     }
@@ -22,11 +22,13 @@ public class InternalTouristXPAndLevelService : IInternalTouristXPAndLevelSerive
         tourist.IncreaseXP(xp);
         _touristRepository.Update(tourist);
     }
+
     public int GetLevel(long touristId)
     {
         var tourist = _touristRepository.Get(touristId);
         if (tourist == null)
             throw new KeyNotFoundException($"Tourist with id {touristId} not found.");
+
         return tourist.Level;
     }
 
@@ -44,6 +46,7 @@ public class InternalTouristXPAndLevelService : IInternalTouristXPAndLevelSerive
             Rank = tourist.Rank.ToString()
         };
     }
+
     public TouristStatsDto GetStatsByPersonId(long personId)
     {
         var tourist = _touristRepository.Get(personId);

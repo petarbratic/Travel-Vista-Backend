@@ -41,6 +41,8 @@ public static class StakeholdersStartup
         services.AddScoped<IInternalTouristXPAndLevelSerive, InternalTouristXPAndLevelService>();
         services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
         services.AddScoped<IInternalWalletService, WalletService>();
+        services.AddScoped<IFirstTimeXpService, FirstTimeXpService>();
+        services.AddScoped<ITouristXPService, TouristXPService>();
 
         services.AddScoped<IXpEventService, XpEventService>();
         services.AddScoped<IInternalXpEventService, InternalXpEventService>();
@@ -62,7 +64,9 @@ public static class StakeholdersStartup
         services.AddScoped<IMeetupRepository, MeetupDbRepository>();
         services.AddScoped<IPreferenceRepository, PreferenceDbRepository>(); //preference
         services.AddScoped<ITouristRepository, TouristDbRepository>();  //oprema
-
+        services.AddScoped<IXpEventRepository, XpEventDbRepository>();
+        services.AddScoped<IAchievementRepository, AchievementDbRepository>();
+        services.AddScoped<IFirstTimeXpService, FirstTimeXpService>();
         services.AddScoped<IWalletRepository, WalletDbRepository>();
 
         services.AddScoped<IClubJoinRequestRepository, ClubJoinRequestRepository>();

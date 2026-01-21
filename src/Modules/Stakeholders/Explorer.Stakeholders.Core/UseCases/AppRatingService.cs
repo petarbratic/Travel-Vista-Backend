@@ -4,11 +4,6 @@ using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -16,12 +11,24 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly IAppRatingRepository _repository;
         private readonly IUserRepository _userRepository;
+        private readonly IPersonRepository _personRepository; // DODATO
+        private readonly ITouristRepository _touristRepository;
+        private readonly IFirstTimeXpService _firstTimeXpService;
         private readonly IMapper _mapper;
 
-        public AppRatingService(IAppRatingRepository repository, IUserRepository userRepository, IMapper mapper)
+        public AppRatingService(
+            IAppRatingRepository repository,
+            IUserRepository userRepository,
+            IPersonRepository personRepository,
+            ITouristRepository touristRepository,
+            IFirstTimeXpService firstTimeXpService,
+            IMapper mapper)
         {
             _repository = repository;
             _userRepository = userRepository;
+            _personRepository = personRepository;
+            _touristRepository = touristRepository;
+            _firstTimeXpService = firstTimeXpService;
             _mapper = mapper;
         }
 
@@ -29,14 +36,26 @@ namespace Explorer.Stakeholders.Core.UseCases
         {
             var rating = _repository.GetByUserId(userId);
 
-            if (rating == null)
+            if (rating == null) // ← Prvi put
             {
                 var newRating = new AppRating(userId, entity.Rating, entity.Comment);
                 _repository.Create(newRating);
                 rating = newRating;
+
+                // Award XP - koristi rating.Id kao SourceEntityId
+                var person = _personRepository.GetByUserId(userId);
+                if (person != null)
+                {
+                    var tourist = _touristRepository.GetByPersonId(person.Id);
+                    if (tourist != null)
+                    {
+                        _firstTimeXpService.TryAwardFirstAppReview(tourist.Id, rating.Id); // ← rating.Id je unique!
+                    }
+                }
             }
-            else
+            else // ← Update postojećeg
             {
+                // Ne daje XP za update
                 _mapper.Map(entity, rating);
                 rating.Validate();
                 rating.UpdatedAt = DateTime.Now;

@@ -1,8 +1,8 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
 
-namespace Explorer.Stakeholders.API.Internal;
+namespace Explorer.Stakeholders.API.Public;
 
-public interface IInternalTouristXPAndLevelSerive
+public interface ITouristXPService
 {
     void AddExperience(long touristId, int xp);
     int GetLevel(long touristId);

@@ -11,6 +11,12 @@ namespace Explorer.Stakeholders.Core.Domain
     {
         TourCompleted,
         ClubJoined,
+        ReviewWritten,
+        //First-time akcije
+        FirstProfilePictureSet,
+        FirstAppReview,
+        FirstClubJoined,
+        FirstBlogCreated,
         TourReviewWritten,
         AppReviewWritten,
         TourBought

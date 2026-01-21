@@ -1,10 +1,13 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Stakeholders.Core.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using System;
 using System.Linq;
+using System.Security.Claims;
 
 namespace Explorer.API.Controllers.Author_Tourist
 {
@@ -14,10 +17,12 @@ namespace Explorer.API.Controllers.Author_Tourist
     public class BlogController : ControllerBase
     {
         private readonly IBlogService _blogService;
+        private readonly IFirstTimeXpService? _firstTimeXpService;
 
-        public BlogController(IBlogService blogService)
+        public BlogController(IBlogService blogService, IFirstTimeXpService? firstTimeXpService = null)
         {
             _blogService = blogService;
+            _firstTimeXpService = firstTimeXpService;
         }
 
         private int GetUserId()
@@ -38,6 +43,10 @@ namespace Explorer.API.Controllers.Author_Tourist
             var userId = int.Parse(User.Claims.First(c => c.Type == "id").Value);
             blogDto.AuthorId = userId;
             var result = _blogService.CreateBlog(blogDto);
+
+            // NOVO: Award XP ako je turista (automatski proverava)
+            _firstTimeXpService?.TryAwardFirstBlogCreationByUserId(userId, result.Id);
+
             return CreatedAtAction(nameof(GetBlogById), new { id = result.Id }, result);
         }
 

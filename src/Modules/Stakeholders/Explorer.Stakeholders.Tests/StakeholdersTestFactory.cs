@@ -23,6 +23,13 @@ public class StakeholdersTestFactory : BaseTestFactory<StakeholdersContext>
         services.Remove(paymentsDescriptor!);
         services.AddDbContext<PaymentsContext>(SetupTestContext());
 
+        var blogDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<Explorer.Blog.Infrastructure.Database.BlogContext>));
+        services.Remove(blogDescriptor!);
+        services.AddDbContext<Explorer.Blog.Infrastructure.Database.BlogContext>(SetupTestContext());
+
+        var encounterDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<Explorer.Encounters.Infrastructure.Database.EncountersContext>));
+        services.Remove(encounterDescriptor!);
+        services.AddDbContext<Explorer.Encounters.Infrastructure.Database.EncountersContext>(SetupTestContext());
 
         return services;
     }

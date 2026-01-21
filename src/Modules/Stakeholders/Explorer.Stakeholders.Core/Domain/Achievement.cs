@@ -1,4 +1,4 @@
-﻿using Explorer.BuildingBlocks.Core.Domain;
+using Explorer.BuildingBlocks.Core.Domain;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +15,14 @@ namespace Explorer.Stakeholders.Core.Domain
         FirstClubJoined,
         FiveClubsJoined,
         TenClubsJoined,
+        FirstReviewWritten,
+        FiveReviewsWritten,
+        TenReviewsWritten,
+
+        //First-time achievements
+        FirstProfilePictureSet,
+        FirstAppReview,
+        FirstBlogCreated,
         FirstTourReviewWritten,
         FiveTourReviewsWritten,
         TenTourReviewsWritten,
