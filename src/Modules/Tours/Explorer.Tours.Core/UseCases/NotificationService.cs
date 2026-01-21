@@ -176,4 +176,18 @@ public class NotificationService : INotificationService, IInternalNotificationSe
         _ = _publisher.PublishAsync(notificationDto);
     }
 
+    public void CreateTourOnSaleNotification(long recipientId, long tourId, string tourName, decimal discountPercentage)
+    {
+        var notification = new Notification(
+            recipientId: recipientId,
+            type: NotificationType.TourOnSale,
+            relatedEntityId: tourId, 
+            message: $"Tour '{tourName}' is now on sale: {(double)discountPercentage:0.#}% off!"
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
+
 }

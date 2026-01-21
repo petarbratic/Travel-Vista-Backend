@@ -55,4 +55,14 @@ public class TourWishlistDbRepository : ITourWishlistRepository
         return _context.TourWishlists
             .Any(w => w.TouristId == touristId && w.TourId == tourId);
     }
+
+    public List<long> GetTouristIdsForTour(long tourId)
+    {
+        return _context.TourWishlists
+            .Where(w => w.TourId == tourId)
+            .Select(w => w.TouristId)
+            .Distinct()
+            .ToList();
+    }
+
 }
