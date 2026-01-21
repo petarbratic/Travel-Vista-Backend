@@ -22,7 +22,7 @@ namespace Explorer.Stakeholders.Core.Domain
         //First-time achievements
         FirstProfilePictureSet,
         FirstAppReview,
-        FirstBlogCreated
+        FirstBlogCreated,
         FirstTourReviewWritten,
         FiveTourReviewsWritten,
         TenTourReviewsWritten,
@@ -47,6 +47,5 @@ namespace Explorer.Stakeholders.Core.Domain
             AwardedAtUtc = DateTime.UtcNow;
         }
     }
-}
 }
 

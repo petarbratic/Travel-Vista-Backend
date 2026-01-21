@@ -16,7 +16,7 @@ namespace Explorer.Stakeholders.Core.Domain
         FirstProfilePictureSet,
         FirstAppReview,
         FirstClubJoined,
-        FirstBlogCreated
+        FirstBlogCreated,
         TourReviewWritten,
         AppReviewWritten,
         TourBought
