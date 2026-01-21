@@ -11,7 +11,9 @@ namespace Explorer.Stakeholders.Core.Domain
     {
         TourCompleted,
         ClubJoined,
-        ReviewWritten
+        TourReviewWritten,
+        AppReviewWritten,
+        TourBought
     }
 
     public class XpEvent : Entity

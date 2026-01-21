@@ -15,9 +15,12 @@ namespace Explorer.Stakeholders.Core.Domain
         FirstClubJoined,
         FiveClubsJoined,
         TenClubsJoined,
-        FirstReviewWritten,
-        FiveReviewsWritten,
-        TenReviewsWritten
+        FirstTourReviewWritten,
+        FiveTourReviewsWritten,
+        TenTourReviewsWritten,
+        FirstTourBought,
+        FiveTourBought,
+        TenTourBought
     }
 
     public class Achievement : Entity

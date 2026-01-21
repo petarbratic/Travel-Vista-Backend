@@ -71,14 +71,23 @@ namespace Explorer.Stakeholders.Core.UseCases
                 AchievementCode.TenClubsJoined =>
                     ("Ten Clubs Joined", "You have joined 10 clubs."),
 
-                AchievementCode.FirstReviewWritten =>
-                    ("First Review Written", "You have written your first review."),
+                AchievementCode.FirstTourReviewWritten =>
+                    ("First Tour Review Written", "You have written your first tour review."),
 
-                AchievementCode.FiveReviewsWritten =>
-                    ("Five Reviews Written", "You have written 5 reviews."),
+                AchievementCode.FiveTourReviewsWritten =>
+                    ("Five Tour Reviews Written", "You have written 5 tour reviews."),
 
-                AchievementCode.TenReviewsWritten =>
-                    ("Ten Reviews Written", "You have written 10 reviews."),
+                AchievementCode.TenTourReviewsWritten =>
+                    ("Ten Tour Reviews Written", "You have written 10 tour reviews."),
+
+                AchievementCode.FirstTourBought =>
+                    ("First Tour Purchased", "You have purchased your first tour."),
+
+                AchievementCode.FiveTourBought =>
+                    ("Five Tours Purchased", "You have purchased 5 tours."),
+
+                AchievementCode.TenTourBought =>
+                    ("Ten Tours Purchased", "You have purchased 10 tours."),
 
                 _ =>
                     ("Achievement Unlocked", "You have unlocked a new achievement.")
