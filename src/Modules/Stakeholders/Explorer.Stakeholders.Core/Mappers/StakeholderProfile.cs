@@ -51,5 +51,12 @@ public class StakeholderProfile : Profile
         CreateMap<XpEvent, XpEventDto>()
             .ForMember(d => d.Type, opt => opt.MapFrom(s => s.Type.ToString()))
             .ForMember(d => d.Description, opt => opt.Ignore());
+
+        //Tourist Level
+        CreateMap<Tourist, TouristStatsDto>()
+            .ForMember(dest => dest.TouristId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.XP, opt => opt.MapFrom(src => src.XP))
+            .ForMember(dest => dest.Level, opt => opt.MapFrom(src => src.Level))
+            .ForMember(dest => dest.Rank, opt => opt.MapFrom(src => src.Rank.ToString()));
     }
 }
