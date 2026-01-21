@@ -30,9 +30,9 @@ public class FirstTimeXpService : IFirstTimeXpService
 
     public void TryAwardFirstProfilePicture(long touristId, long personId)
     {
-        TryAwardFirstTime(
+        // Za profilnu sliku, koristi touristId kao sourceEntityId (jer je samo jednom akcija)
+        TryAwardFirstTimeOnce(
             touristId,
-            personId,
             XpEventType.FirstProfilePictureSet,
             AchievementCode.FirstProfilePictureSet,
             ProfilePictureXp
@@ -41,9 +41,9 @@ public class FirstTimeXpService : IFirstTimeXpService
 
     public void TryAwardFirstAppReview(long touristId, long appRatingId)
     {
-        TryAwardFirstTime(
+        // Za app review, koristi touristId kao sourceEntityId
+        TryAwardFirstTimeOnce(
             touristId,
-            appRatingId,
             XpEventType.FirstAppReview,
             AchievementCode.FirstAppReview,
             AppReviewXp
@@ -52,9 +52,9 @@ public class FirstTimeXpService : IFirstTimeXpService
 
     public void TryAwardFirstClubJoin(long touristId, long clubId)
     {
-        TryAwardFirstTime(
+        // Za klub, koristi touristId kao sourceEntityId (ne clubId)
+        TryAwardFirstTimeOnce(
             touristId,
-            clubId,
             XpEventType.FirstClubJoined,
             AchievementCode.FirstClubJoined,
             ClubJoinXp
@@ -63,9 +63,9 @@ public class FirstTimeXpService : IFirstTimeXpService
 
     public void TryAwardFirstBlogCreation(long touristId, long blogId)
     {
-        TryAwardFirstTime(
+        // Za blog, koristi touristId kao sourceEntityId (ne blogId)
+        TryAwardFirstTimeOnce(
             touristId,
-            blogId,
             XpEventType.FirstBlogCreated,
             AchievementCode.FirstBlogCreated,
             BlogCreationXp
@@ -75,42 +75,35 @@ public class FirstTimeXpService : IFirstTimeXpService
     public void TryAwardFirstBlogCreationByUserId(long userId, long blogId)
     {
         var person = _personRepository.GetByUserId(userId);
-        if (person == null)
-        {
-            return;
-        }
+        if (person == null) return;
 
-        // ISPRAVLJENO: Koristi GetByPersonId umesto Get
         var tourist = _touristRepository.GetByPersonId(person.Id);
-        if (tourist == null)
-        {
-            return;
-        }
+        if (tourist == null) return;
 
-        TryAwardFirstTime(
-            tourist.Id,
-            blogId,
-            XpEventType.FirstBlogCreated,
-            AchievementCode.FirstBlogCreated,
-            BlogCreationXp
-        );
+        TryAwardFirstBlogCreation(tourist.Id, blogId);
     }
 
-    private void TryAwardFirstTime(
+    // NOVA metoda - proverava samo da li type postoji za turista
+    private void TryAwardFirstTimeOnce(
         long touristId,
-        long sourceEntityId,
         XpEventType eventType,
         AchievementCode achievementCode,
         int xpAmount)
     {
-        if (_xpEventRepository.Exists(touristId, eventType, sourceEntityId))
+        // Proveri da li već ima BILO KOJI event ovog tipa
+        int existingCount = _xpEventRepository.CountByType(touristId, eventType);
+
+        if (existingCount > 0)
         {
+            // Već je dobio XP za ovu vrstu akcije
             return;
         }
 
-        var xpEvent = new XpEvent(touristId, eventType, xpAmount, sourceEntityId);
+        // Prvi put - kreiraj event sa touristId kao sourceEntityId
+        var xpEvent = new XpEvent(touristId, eventType, xpAmount, touristId);
         _xpEventRepository.Create(xpEvent);
 
+        // Dodaj XP
         var tourist = _touristRepository.Get(touristId);
         if (tourist != null)
         {
@@ -118,6 +111,7 @@ public class FirstTimeXpService : IFirstTimeXpService
             _touristRepository.Update(tourist);
         }
 
+        // Dodaj achievement
         if (!_achievementRepository.Has(touristId, achievementCode))
         {
             var achievement = new Achievement(touristId, achievementCode);
