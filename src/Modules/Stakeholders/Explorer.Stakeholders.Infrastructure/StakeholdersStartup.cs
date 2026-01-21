@@ -41,8 +41,13 @@ public static class StakeholdersStartup
         services.AddScoped<IInternalTouristXPAndLevelSerive, InternalTouristXPAndLevelService>();
         services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
         services.AddScoped<IInternalWalletService, WalletService>();
+
+        services.AddScoped<IXpEventService, XpEventService>();
+        services.AddScoped<IInternalXpEventService, InternalXpEventService>();
+
         services.AddScoped<IWelcomeBonusService, WelcomeBonusService>();
         services.AddScoped<IInternalWelcomeBonusService, WelcomeBonusService>();
+
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -61,6 +66,10 @@ public static class StakeholdersStartup
         services.AddScoped<IWalletRepository, WalletDbRepository>();
 
         services.AddScoped<IClubJoinRequestRepository, ClubJoinRequestRepository>();
+
+
+        services.AddScoped<IXpEventRepository, XpEventDbRepository>();
+
         services.AddScoped<IWelcomeBonusRepository, WelcomeBonusDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));

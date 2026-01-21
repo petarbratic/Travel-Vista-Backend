@@ -206,6 +206,17 @@ namespace Explorer.Payments.Tests
 
             services.AddScoped<IInternalBundleService>(_ => bundleMock.Object);
 
+            // ==================== MOCK: IInternalXpEventService ====================
+            var existingXp = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalXpEventService));
+            if (existingXp != null) services.Remove(existingXp);
+
+            var xpMock = new Mock<IInternalXpEventService>();
+
+
+            xpMock.Setup(x => x.BuyTourXp(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<int>()));
+
+            services.AddScoped<IInternalXpEventService>(_ => xpMock.Object);
+
             return services;
         }
     }
