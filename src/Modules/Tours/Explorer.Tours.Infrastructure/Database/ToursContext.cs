@@ -32,6 +32,9 @@ public class ToursContext : DbContext
 
     public DbSet<Sale> Sales { get; set; }
 
+    public DbSet<GroupTourSession> GroupTourSessions { get; set; }
+    public DbSet<GroupTourSessionParticipant> GroupTourSessionParticipants { get; set; }
+
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -322,5 +325,13 @@ public class ToursContext : DbContext
 
             entity.HasIndex(s => s.AuthorId);
         });
+        
+        modelBuilder.Entity<GroupTourSession>()
+            .HasMany(gts => gts.Participants)
+            .WithOne()
+            .HasForeignKey(p => p.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+
     }
 }

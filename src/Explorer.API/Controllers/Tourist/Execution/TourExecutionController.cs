@@ -12,12 +12,10 @@ namespace Explorer.API.Controllers.Tourist.Execution;
 public class TourExecutionController : ControllerBase
 {
     private readonly ITourExecutionService _tourExecutionService;
-    private readonly ITourService _tourService;
 
-    public TourExecutionController(ITourExecutionService tourExecutionService, ITourService tourService)
+    public TourExecutionController(ITourExecutionService tourExecutionService)
     {
         _tourExecutionService = tourExecutionService;
-        _tourService = tourService;
     }
 
     [HttpPost("start")]
@@ -51,12 +49,7 @@ public class TourExecutionController : ControllerBase
     [HttpGet("active/{touristId:long}")]
     public ActionResult<TourDto> GetActiveTourByTouristId(long touristId)
     {
-        var activeTourExecution = _tourExecutionService.GetActiveTourExecution(touristId);
-
-        if (activeTourExecution == null)
-            return Ok(null);
-
-        var activeTour = _tourService.GetById(activeTourExecution.TourId);
+        var activeTour = _tourExecutionService.GetActiveTourByTouristId(touristId);
         if (activeTour == null)
             return Ok(null);
 

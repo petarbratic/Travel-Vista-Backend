@@ -96,5 +96,9 @@ public class ToursProfile : Profile
         CreateMap<Sale, SaleDto>().ReverseMap();
         CreateMap<SaleCreateDto, Sale>();
         CreateMap<SaleUpdateDto, Sale>();
+
+        CreateMap<GroupTourSession, GroupTourSessionDto>().ReverseMap();
+        CreateMap<CreateGroupTourSessionDto, GroupTourSession>();
+        CreateMap<GroupTourSessionParticipant, GroupTourSessionParticipantDto>().ReverseMap();
     }
 }
