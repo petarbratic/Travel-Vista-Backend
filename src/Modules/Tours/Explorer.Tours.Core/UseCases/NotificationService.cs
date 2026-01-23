@@ -190,4 +190,18 @@ public class NotificationService : INotificationService, IInternalNotificationSe
         _ = _publisher.PublishAsync(notificationDto);
     }
 
+    public void CreateTourPurchaseAchievementNotification(long recipientId, string message)
+    {
+        var notification = new Notification(
+            recipientId: recipientId,
+            type: NotificationType.TourPurchaseAchievement,
+            relatedEntityId: 1, // not the best practice, but ...
+            message: message
+        );
+
+        _notificationRepository.Create(notification);
+        var notificationDto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(notificationDto);
+    }
+
 }

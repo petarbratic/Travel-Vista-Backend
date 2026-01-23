@@ -8,5 +8,6 @@ public enum NotificationType
     WalletTopUp = 4,         // Uplata AC
     TourPurchased = 5,
     BundlePurchase = 6,
-    TourOnSale = 7
+    TourOnSale = 7,
+    TourPurchaseAchievement = 8,
 }
