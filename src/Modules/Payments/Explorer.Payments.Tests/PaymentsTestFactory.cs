@@ -10,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Explorer.Payments.Tests
@@ -102,22 +103,50 @@ namespace Explorer.Payments.Tests
             if (existingWallet != null) services.Remove(existingWallet);
 
             var walletMock = new Mock<IInternalWalletService>();
+            // Koristimo static dictionary koji se deli između svih scope-ova
+            // Resetuje se između testova jer se kreira novi Factory instance
+            var walletBalances = new Dictionary<long, int>();
 
             walletMock.Setup(s => s.GetWallet(It.IsAny<long>()))
-                .Returns((long personId) => new WalletDto
+                .Returns((long personId) =>
                 {
-                    PersonId = personId,
-                    BalanceAc = 100000
+                    lock (walletBalances)
+                    {
+                        if (!walletBalances.ContainsKey(personId))
+                            walletBalances[personId] = 100000;
+                        return new WalletDto
+                        {
+                            PersonId = personId,
+                            BalanceAc = walletBalances[personId]
+                        };
+                    }
                 });                        
 
             walletMock.Setup(s => s.DeductAc(It.IsAny<long>(), It.IsAny<decimal>()))
-                .Returns((long personId, decimal amount) => new WalletDto
+                .Callback((long personId, decimal amount) =>
                 {
-                    PersonId = personId,
-                    BalanceAc = 100000 - (int)amount
+                    lock (walletBalances)
+                    {
+                        if (!walletBalances.ContainsKey(personId))
+                            walletBalances[personId] = 100000;
+                        walletBalances[personId] -= (int)amount;
+                    }
+                })
+                .Returns((long personId, decimal amount) =>
+                {
+                    lock (walletBalances)
+                    {
+                        if (!walletBalances.ContainsKey(personId))
+                            walletBalances[personId] = 100000;
+                        return new WalletDto
+                        {
+                            PersonId = personId,
+                            BalanceAc = walletBalances[personId]
+                        };
+                    }
                 });
 
-            services.AddScoped<IInternalWalletService>(_ => walletMock.Object);
+            services.AddSingleton<IInternalWalletService>(_ => walletMock.Object);
 
             // ==================== MOCK: IInternalNotificationService ====================
             var existingNotification = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalNotificationService));
@@ -176,6 +205,17 @@ namespace Explorer.Payments.Tests
             bundleMock.Setup(s => s.GetById(-99)).Returns((Tours.API.Dtos.BundleDto)null);
 
             services.AddScoped<IInternalBundleService>(_ => bundleMock.Object);
+
+            // ==================== MOCK: IInternalXpEventService ====================
+            var existingXp = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalXpEventService));
+            if (existingXp != null) services.Remove(existingXp);
+
+            var xpMock = new Mock<IInternalXpEventService>();
+
+
+            xpMock.Setup(x => x.BuyTourXp(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<int>()));
+
+            services.AddScoped<IInternalXpEventService>(_ => xpMock.Object);
 
             return services;
         }

@@ -12,15 +12,19 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly IClubRepository _clubRepository;
         private readonly IPersonRepository _personRepository;
         private readonly IMapper _mapper;
+        private readonly IFirstTimeXpService _firstTimeXpService; 
 
-        public ClubJoinRequestService(IClubJoinRequestRepository requestRepository,
-                                      IClubRepository clubRepository,
-                                      IPersonRepository personRepository,
-                                      IMapper mapper)
+        public ClubJoinRequestService(
+            IClubJoinRequestRepository requestRepository,
+            IClubRepository clubRepository,
+            IPersonRepository personRepository,
+            IFirstTimeXpService firstTimeXpService,
+            IMapper mapper)
         {
             _requestRepository = requestRepository;
             _clubRepository = clubRepository;
             _personRepository = personRepository;
+            _firstTimeXpService = firstTimeXpService;
             _mapper = mapper;
         }
 
@@ -72,6 +76,9 @@ namespace Explorer.Stakeholders.Core.UseCases
             {
                 club.AddMember(request.TouristId);
                 _clubRepository.Update(club);
+
+                // DODAJ OVO - Award XP za prvi klub
+                _firstTimeXpService.TryAwardFirstClubJoin(request.TouristId, club.Id);
             }
 
             _requestRepository.Delete(requestId);

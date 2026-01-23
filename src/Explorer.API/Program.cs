@@ -1,8 +1,10 @@
 ﻿using Explorer.API.Middleware;
 using Explorer.API.Notifications;
+using Explorer.API.Services;
 using Explorer.API.Startup;
 using Explorer.Blog.Infrastructure;
 using Explorer.Payments.Infrastructure;
+using Explorer.Stakeholders.Infrastructure;
 using Explorer.Tours.API.Public;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.FileProviders;
@@ -34,12 +36,14 @@ builder.Services.AddCors(options =>
 
 builder.Services.ConfigureAuth();
 
+builder.Services.ConfigureStakeholdersModule();
 builder.Services.ConfigureBlogModule();
 builder.Services.ConfigurePaymentsModule();
 builder.Services.AddScoped<INotificationPublisher, SignalRNotificationPublisher>();
 
-builder.Services.RegisterModules();
 
+builder.Services.RegisterModules();
+builder.Services.AddScoped<IAuthorProfileQueryService, AuthorProfileQueryService>();
 builder.Services.AddSingleton<IWebHostEnvironment>(builder.Environment);
 
 // =======================

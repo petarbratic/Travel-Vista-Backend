@@ -40,4 +40,13 @@ namespace Explorer.Stakeholders.API.Dtos
         public decimal Longitude { get; set; }
         public long? TourId { get; set; }
     }
+    public class MeetupMapPreviewDto
+    {
+        public long Id { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime StartTime { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
+    }
 }

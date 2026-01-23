@@ -1,4 +1,4 @@
-﻿using Explorer.Stakeholders.Core.Domain;
+using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -26,6 +26,10 @@ public class StakeholdersContext : DbContext
     public DbSet<Tourist> Tourists { get; set; }
 
     public DbSet<Wallet> Wallets { get; set; }
+
+    public DbSet<XpEvent> XpEvents { get; set; }
+    public DbSet<Achievement> Achievements { get; set; }
+    public DbSet<WelcomeBonus> WelcomeBonuses { get; set; }
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -134,6 +138,71 @@ public class StakeholdersContext : DbContext
             entity.HasIndex(w => w.PersonId).IsUnique();
             entity.Property(w => w.BalanceAc).IsRequired();
         });
+
+
+
+        modelBuilder.Entity<XpEvent>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+
+            // FK ka Tourist
+            entity.HasOne<Tourist>()
+                .WithMany()
+                .HasForeignKey(e => e.TouristId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(e => e.SourceEntityId).IsRequired();
+
+            // Enum u int (kao što radiš za Club.Status)
+            entity.Property(e => e.Type)
+                .HasConversion<int>();
+
+            entity.Property(e => e.Amount).IsRequired();
+            entity.Property(e => e.CreatedAtUtc).IsRequired();
+
+            // Indeks za brzo listanje istorije
+            entity.HasIndex(e => new { e.TouristId, e.CreatedAtUtc });
+
+            // Sprečavanje dupliranja XP-a za istu stvar (idempotentnost)
+            entity.HasIndex(e => new { e.TouristId, e.Type, e.SourceEntityId })
+                .IsUnique();
+        });
+
+        modelBuilder.Entity<Achievement>(entity =>
+        {
+            entity.HasKey(a => a.Id);
+
+            entity.HasOne<Tourist>()
+                .WithMany()
+                .HasForeignKey(a => a.TouristId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.Property(a => a.Code)
+                .HasConversion<int>();
+
+            entity.Property(a => a.AwardedAtUtc).IsRequired();
+
+            // Bedž se dobija jednom
+            entity.HasIndex(a => new { a.TouristId, a.Code })
+                .IsUnique();
+
+            // Za listanje bedževa
+            entity.HasIndex(a => new { a.TouristId, a.AwardedAtUtc });
+        });
+
+
+        modelBuilder.Entity<WelcomeBonus>(entity =>
+        {
+            entity.HasKey(wb => wb.Id);
+            entity.HasIndex(wb => wb.PersonId).IsUnique();
+            entity.Property(wb => wb.BonusType).IsRequired();
+            entity.Property(wb => wb.Value).IsRequired();
+            entity.Property(wb => wb.IsUsed).IsRequired();
+            entity.Property(wb => wb.CreatedAt).IsRequired();
+            entity.Property(wb => wb.ExpiresAt).IsRequired();
+            entity.Property(wb => wb.UsedAt).IsRequired(false);
+        });
+
 
     }
 

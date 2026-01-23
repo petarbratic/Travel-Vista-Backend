@@ -46,7 +46,7 @@ namespace Explorer.Stakeholders.Tests.Integration.Clubs
             var service = scope.ServiceProvider.GetRequiredService<IClubJoinRequestService>();
             var dbContext = scope.ServiceProvider.GetRequiredService<StakeholdersContext>();
 
-            long touristId = -24;
+            long touristId = -21;
             long clubId = -2;   
             long ownerId = -22; 
 

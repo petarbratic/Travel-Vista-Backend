@@ -117,6 +117,29 @@ public class MeetupQueryTests : BaseStakeholdersIntegrationTest
         result.ShouldBeEmpty();
     }
 
+    [Fact]
+    public void Retrieves_map_locations_for_future_meetups()
+    {
+        // Arrange
+        using var scope = Factory.Services.CreateScope();
+        var controller = CreateTouristController(scope);
+
+        // Act
+        var result = ((ObjectResult)controller.GetMapLocations().Result)?.Value as List<MeetupMapPreviewDto>;
+
+        // Assert
+        result.ShouldNotBeNull();
+        result.ShouldNotBeEmpty();
+        result.Count.ShouldBeGreaterThanOrEqualTo(4);
+
+        var meetup = result.FirstOrDefault(m => m.Id == -1);
+        meetup.ShouldNotBeNull();
+        meetup.Title.ShouldBe("PSW Networking Event");
+        meetup.Latitude.ShouldBe(45.2671m);
+        meetup.Longitude.ShouldBe(19.8335m);
+        meetup.StartTime.ShouldBe(new DateTime(2026, 06, 15, 18, 0, 0));
+    }
+
     private static AuthorMeetupController CreateAuthorController(IServiceScope scope)
     {
         return new AuthorMeetupController(scope.ServiceProvider.GetRequiredService<IMeetupService>())
