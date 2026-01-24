@@ -1,14 +1,12 @@
 ﻿// src/Modules/Tours/Explorer.Tours.Tests/Integration/Tourist/TourAccessTests.cs
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Explorer.API.Controllers.Shopping;
 using Explorer.API.Controllers.Tourist;
 using Explorer.API.Controllers.Tourist.Execution;
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
+using Explorer.Payments.Infrastructure.Database;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Microsoft.AspNetCore.Mvc;
@@ -22,20 +20,36 @@ namespace Explorer.Tours.Tests.Integration.Tourist
     {
         public TourAccessTests(ToursTestFactory factory) : base(factory) { }
 
-        private static string NewPersonId() =>
-            (-10000 - Guid.NewGuid().GetHashCode()).ToString();
+        // Koristimo različite test turiste za različite testove
+        private const string TestTourist1 = "-21"; // Bronze rank, 5000 AC
+        private const string TestTourist2 = "-22"; // Silver rank, 5000 AC
+        private const string TestTourist3 = "-23"; // Gold rank, 5000 AC
 
-        // =============================
-        // 1. Nekupljena tura → nema KeyPoints
-        // =============================
+        // Helper za čišćenje korpe
+        private void ClearCart(IServiceScope scope, long touristId)
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+            var cart = db.ShoppingCarts.FirstOrDefault(c => c.TouristId == touristId);
+            if (cart != null)
+            {
+                cart.Clear();
+                db.SaveChanges();
+            }
+        }
+
         [Fact]
         public void Details_returns_no_keypoints_for_unpurchased_tour()
         {
-            var personId = NewPersonId();
-            long tourId = -2; // preseedovana tura
+            long tourId = -2;
+            var testTourist = TestTourist1;
+            var touristId = long.Parse(testTourist);
 
             using var scope = Factory.Services.CreateScope();
-            var controller = CreateTouristToursController(scope, personId);
+
+            // Očisti korpu da sigurno tura nije kupljena
+            ClearCart(scope, touristId);
+
+            var controller = CreateTouristToursController(scope, testTourist);
 
             var result = controller.GetTourDetails(tourId).Result as OkObjectResult;
             result.ShouldNotBeNull();
@@ -45,20 +59,21 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             dto.KeyPoints.ShouldBeNull();
         }
 
-        // =============================
-        // 2. Kupljena tura → prikazuje sve KeyPoints bez secret-a
-        // =============================
         [Fact]
         public void Details_returns_keypoints_after_purchase()
         {
-            var personId = NewPersonId();
             long tourId = -2;
+            var testTourist = TestTourist2; // Koristi drugog turista
+            var touristId = long.Parse(testTourist);
 
             using var scope = Factory.Services.CreateScope();
 
-            var cart = CreateCartController(scope, personId);
-            var purchase = CreatePurchaseController(scope, personId);
-            var controller = CreateTouristToursController(scope, personId);
+            // Očisti korpu pre kupovine
+            ClearCart(scope, touristId);
+
+            var cart = CreateCartController(scope, testTourist);
+            var purchase = CreatePurchaseController(scope, testTourist);
+            var controller = CreateTouristToursController(scope, testTourist);
 
             cart.Add(new ShoppingCartRequestDto { TourId = tourId });
 
@@ -82,17 +97,20 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 .Any(p => p.Name == "Secret")
                 .ShouldBeFalse();
         }
-        // =============================
-        // 3. Arhivirana tura → ne može se kupiti
-        // =============================
+
         [Fact]
         public void Cannot_purchase_archived_tour()
         {
-            var personId = NewPersonId();
-            long tourId = -3; // Arhivirana tura iz mock-a
+            long tourId = -3; // Arhivirana tura
+            var testTourist = TestTourist1;
+            var touristId = long.Parse(testTourist);
 
             using var scope = Factory.Services.CreateScope();
-            var cart = CreateCartController(scope, personId);
+
+            // Očisti korpu
+            ClearCart(scope, touristId);
+
+            var cart = CreateCartController(scope, testTourist);
 
             Should.Throw<InvalidOperationException>(() =>
             {
@@ -100,21 +118,22 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             });
         }
 
-        // =============================
-        // 4. Nekupljena tura → ne može se aktivirati
-        // =============================
         [Fact]
         public void Cannot_start_unpurchased_tour()
         {
-            var personId = NewPersonId();
-            long tourId = -2;
+            long tourId = -4; // Koristi drugu turu koja sigurno nije kupljena
+            var testTourist = TestTourist1;
+            var touristId = long.Parse(testTourist);
 
             using var scope = Factory.Services.CreateScope();
-            var exec = CreateExecutionController(scope, personId);
 
-            // kontroler zahteva claim "id"
+            // Očisti korpu da sigurno tura nije kupljena
+            ClearCart(scope, touristId);
+
+            var exec = CreateExecutionController(scope, testTourist);
+
             exec.ControllerContext.HttpContext.User.Identities.First()
-                .AddClaim(new System.Security.Claims.Claim("id", personId));
+                .AddClaim(new System.Security.Claims.Claim("id", testTourist));
 
             var request = new TourExecutionCreateDto
             {
@@ -125,28 +144,33 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             var result = exec.StartTour(request).Result;
 
-            // SA MOCK-OM koji uvek vraća true za HasPurchasedTour, ovaj test će proći kao OK
-            // Mock kaže da je svaka tura "kupljena", tako da će startovanje biti uspešno
-            result.ShouldBeOfType<OkObjectResult>();
+            // Očekujemo BadRequest jer tura nije kupljena
+            result.ShouldBeOfType<BadRequestObjectResult>();
+
+            var badRequest = result as BadRequestObjectResult;
+            badRequest.ShouldNotBeNull();
+            // Opciono: proveri poruku greške
+            // badRequest.Value.ShouldContain("not purchased");
         }
 
-        // =============================
-        // 5. Kupljena tura → može se aktivirati
-        // =============================
         [Fact]
         public void Can_start_purchased_tour()
         {
-            var personId = NewPersonId();
             long tourId = -2;
+            var testTourist = TestTourist3; // Koristi trećeg turista
+            var touristId = long.Parse(testTourist);
 
             using var scope = Factory.Services.CreateScope();
 
-            var cart = CreateCartController(scope, personId);
-            var purchase = CreatePurchaseController(scope, personId);
-            var exec = CreateExecutionController(scope, personId);
+            // Očisti korpu pre kupovine
+            ClearCart(scope, touristId);
+
+            var cart = CreateCartController(scope, testTourist);
+            var purchase = CreatePurchaseController(scope, testTourist);
+            var exec = CreateExecutionController(scope, testTourist);
 
             exec.ControllerContext.HttpContext.User.Identities.First()
-                .AddClaim(new System.Security.Claims.Claim("id", personId));
+                .AddClaim(new System.Security.Claims.Claim("id", testTourist));
 
             cart.Add(new ShoppingCartRequestDto { TourId = tourId });
 
@@ -168,9 +192,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             result.ShouldBeOfType<OkObjectResult>();
         }
 
-        // =============================
         // Helperi
-        // =============================
         private TouristToursController CreateTouristToursController(IServiceScope scope, string personId)
         {
             return new TouristToursController(

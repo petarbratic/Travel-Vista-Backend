@@ -8,4 +8,5 @@ public interface ITouristXPService
     int GetLevel(long touristId);
     TouristStatsDto GetTouristStats(long touristId);
     TouristStatsDto GetStatsByPersonId(long personId);
+    public decimal GetRankDiscountPercentage(long touristId);
 }
