@@ -10,15 +10,19 @@ public class RankRewardService : IRankRewardService
     private readonly ITouristRepository _touristRepository;
     private readonly ITouristRankRewardsRepository _rankRewardsRepository;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWalletTransactionRepository _txRepo;
+
 
     public RankRewardService(
         ITouristRepository touristRepository,
         ITouristRankRewardsRepository rankRewardsRepository,
-        IWalletRepository walletRepository)
+        IWalletRepository walletRepository,
+        IWalletTransactionRepository txRepo)
     {
         _touristRepository = touristRepository;
         _rankRewardsRepository = rankRewardsRepository;
         _walletRepository = walletRepository;
+        _txRepo = txRepo;
     }
 
     public RankRewardClaimResultDto ClaimRankRewards(long touristId)
@@ -91,6 +95,14 @@ public class RankRewardService : IRankRewardService
 
         wallet.AddAc(totalAcAwarded);
         _walletRepository.Update(wallet);
+        _txRepo.Create(new WalletTransaction(
+            personId: touristId,
+            amountAc: totalAcAwarded,
+            type: WalletTransactionType.RankRewardAc,
+            description: $"Rank reward: +{totalAcAwarded} AC ({string.Join(", ", claimedRanks)})",
+            referenceType: "RankReward",
+            referenceId: rankRewards.Id
+        ));
 
         return new RankRewardClaimResultDto
         {

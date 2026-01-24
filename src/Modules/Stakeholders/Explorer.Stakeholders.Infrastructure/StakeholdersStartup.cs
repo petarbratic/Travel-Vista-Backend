@@ -71,6 +71,7 @@ public static class StakeholdersStartup
         services.AddScoped<IXpEventRepository, XpEventDbRepository>();
         services.AddScoped<IWelcomeBonusRepository, WelcomeBonusDbRepository>();
         services.AddScoped<ITouristRankRewardsRepository, TouristRankRewardsRepository>();
+        services.AddScoped<IWalletTransactionRepository, WalletTransactionDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();

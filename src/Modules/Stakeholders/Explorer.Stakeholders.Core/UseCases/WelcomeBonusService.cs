@@ -10,12 +10,14 @@ public class WelcomeBonusService : IWelcomeBonusService, IInternalWelcomeBonusSe
 {
     private readonly IWelcomeBonusRepository _bonusRepository;
     private readonly IWalletRepository _walletRepository;
+    private readonly IWalletTransactionRepository _txRepo;
     private static readonly Random _random = new Random();
 
-    public WelcomeBonusService(IWelcomeBonusRepository bonusRepository, IWalletRepository walletRepository)
+    public WelcomeBonusService(IWelcomeBonusRepository bonusRepository, IWalletRepository walletRepository, IWalletTransactionRepository txRepo)
     {
         _bonusRepository = bonusRepository;
         _walletRepository = walletRepository;
+        _txRepo = txRepo;
     }
 
     public WelcomeBonusDto GetWelcomeBonus(long personId)
@@ -49,6 +51,15 @@ public class WelcomeBonusService : IWelcomeBonusService, IInternalWelcomeBonusSe
             {
                 wallet.AddAc(createdBonus.Value);
                 _walletRepository.Update(wallet);
+                _txRepo.Create(new WalletTransaction(
+                    personId: personId,
+                    amountAc: createdBonus.Value,
+                    type: WalletTransactionType.WelcomeBonusAc,
+                    description: $"Welcome bonus: +{createdBonus.Value} AC ({createdBonus.BonusType})",
+                    referenceType: "WelcomeBonus",
+                    referenceId: createdBonus.Id
+                ));
+
             }
         }
 
