@@ -108,7 +108,15 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                     };
                 }
 
-                _walletService.DeductAc(touristId, finalPrice);
+                //_walletService.DeductAc(touristId, finalPrice);
+                _walletService.Debit(
+                    touristId,
+                    (int)finalPrice,
+                    WalletTxTypes.CheckoutPurchase,
+                    $"Checkout purchase (-{(int)finalPrice} AC)",
+                    "Checkout",
+                    cart.Id
+                );
 
                 // Mark welcome bonus as used ONLY if it was the applied discount
                 if (appliedDiscountPercent > 0 && appliedDiscountPercent == welcomeBonusPercent && discountBonus != null)

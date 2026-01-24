@@ -26,6 +26,8 @@ public class StakeholdersContext : DbContext
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<WelcomeBonus> WelcomeBonuses { get; set; }
     public DbSet<TouristRankRewards> TouristRankRewards { get; set; }
+    public DbSet<WalletTransaction> WalletTransactions { get; set; }
+
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -208,6 +210,27 @@ public class StakeholdersContext : DbContext
             entity.Property(r => r.DiamondRewardClaimed).IsRequired();
             entity.Property(r => r.VistaRewardClaimed).IsRequired();
         });
+
+        modelBuilder.Entity<WalletTransaction>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.HasIndex(t => new { t.PersonId, t.CreatedAtUtc });
+
+            entity.Property(t => t.PersonId).IsRequired();
+            entity.Property(t => t.AmountAc).IsRequired();
+
+            entity.Property(t => t.Type)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(t => t.Description).IsRequired();
+            entity.Property(t => t.CreatedAtUtc).IsRequired();
+
+            entity.Property(t => t.ReferenceType).IsRequired(false);
+            entity.Property(t => t.ReferenceId).IsRequired(false);
+            entity.Property(t => t.InitiatorPersonId).IsRequired(false);
+        });
+
 
     }
 

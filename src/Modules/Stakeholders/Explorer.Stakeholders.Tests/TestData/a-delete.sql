@@ -2,6 +2,7 @@ DELETE FROM stakeholders."ClubJoinRequests";
 DELETE FROM stakeholders."TouristRankRewards";
 DELETE FROM stakeholders."WelcomeBonuses";
 DELETE FROM stakeholders."Wallets";
+DELETE FROM stakeholders."WalletTransactions";
 DELETE FROM stakeholders."Meetups";
 DELETE FROM stakeholders."People";
 DELETE FROM stakeholders."Users";
