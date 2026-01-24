@@ -102,7 +102,9 @@ public class AuthenticationService : IAuthenticationService
             {
                 throw new UnauthorizedAccessException("Account is not active");
             }
-            return _tokenGenerator.GenerateAccessToken(existingUser, existingPerson.Id);
+            var existingUserToken = _tokenGenerator.GenerateAccessToken(existingUser, existingPerson.Id);
+            existingUserToken.IsNewUser = false;
+            return existingUserToken;
         }
 
         // User doesn't exist - register as tourist
@@ -117,7 +119,9 @@ public class AuthenticationService : IAuthenticationService
 
         var tourist = _touristRepository.Create(new Tourist(person.Id));
 
-        return _tokenGenerator.GenerateAccessToken(user, person.Id);
+        var newUserToken = _tokenGenerator.GenerateAccessToken(user, person.Id);
+        newUserToken.IsNewUser = true;
+        return newUserToken;
     }
 
     private string GenerateUniqueUsername(string email)
