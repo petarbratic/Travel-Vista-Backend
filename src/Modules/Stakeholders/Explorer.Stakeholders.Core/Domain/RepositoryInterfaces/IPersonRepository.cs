@@ -13,4 +13,5 @@ public interface IPersonRepository
     bool EmailExists(string email);
 
     Person? GetByUserId(long userId);
+    Person? GetByEmail(string email);
 }
