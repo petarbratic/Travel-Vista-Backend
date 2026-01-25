@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using System.Linq;
 using Explorer.API.Controllers.Shopping;
 using Explorer.Payments.API.Dtos;
@@ -18,19 +17,33 @@ namespace Explorer.Payments.Tests.Integration.Shopping
         public TourPurchaseTokenIntegrationTests(PaymentsTestFactory factory)
             : base(factory) { }
 
-        private static string NewPersonId()
+        private const string TestTourist1 = "-21";
+        private const string TestTourist2 = "-22";
+
+        // Helper za čišćenje korpe
+        private void ClearCart(IServiceScope scope, long touristId)
         {
-            return (-10000 - Guid.NewGuid().GetHashCode()).ToString();
+            var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+            var cart = db.ShoppingCarts.FirstOrDefault(c => c.TouristId == touristId);
+            if (cart != null)
+            {
+                cart.Clear();
+                db.SaveChanges();
+            }
         }
 
         [Fact]
         public void Checkout_creates_tokens_and_empties_cart()
         {
-            var personId = NewPersonId();
+            var personId = TestTourist1;
             var touristId = long.Parse(personId);
             var tourId = -2;
 
             using var scope = Factory.Services.CreateScope();
+
+            // Očisti korpu pre testa
+            ClearCart(scope, touristId);
+
             var cartController = new ShoppingCartController(
                 scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
             {
@@ -73,11 +86,16 @@ namespace Explorer.Payments.Tests.Integration.Shopping
         [Fact]
         public void GetTokens_returns_all_tokens_for_tourist()
         {
-            var personId = NewPersonId();
+            var personId = TestTourist2;
+            var touristId = long.Parse(personId);
             var tour1 = -2;
             var tour2 = -4;
 
             using var scope = Factory.Services.CreateScope();
+
+            // Očisti korpu pre testa
+            ClearCart(scope, touristId);
+
             var cart = new ShoppingCartController(
                 scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
             { ControllerContext = BuildContext(personId) };

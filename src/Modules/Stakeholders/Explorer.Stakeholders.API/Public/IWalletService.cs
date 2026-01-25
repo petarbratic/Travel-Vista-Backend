@@ -11,5 +11,6 @@ namespace Explorer.Stakeholders.API.Public
     {
         WalletDto GetMyWallet(long personId);
         WalletDto TopUp(long adminPersonId, long touristPersonId, int amountAc);
+        PagedResultDto<WalletTransactionDto> GetMyTransactions(long personId, int page, int pageSize);
     }
 }

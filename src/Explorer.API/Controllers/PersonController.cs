@@ -69,6 +69,26 @@ public class PersonController : ControllerBase
         }
     }
 
+    // GET: api/stakeholders/person/tourist-stats/{userId}
+    [HttpGet("tourist-stats/{userId:long}")]
+    [Authorize]
+    public ActionResult<TouristStatsDto> GetTouristStatsByUserId(long userId)
+    {
+        try
+        {
+            var stats = _touristXpService.GetStatsByPersonId(userId);
+            return Ok(stats);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An unexpected error occurred: " + ex.Message });
+        }
+    }
+
     [HttpPut]
     public ActionResult<PersonDto> Update([FromBody] PersonDto personDto)
     {

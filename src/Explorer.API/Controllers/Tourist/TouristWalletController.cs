@@ -29,5 +29,10 @@ namespace Explorer.API.Controllers.Tourist
                 throw new UnauthorizedAccessException("personId claim is missing.");
             return id;
         }
+
+        [HttpGet("transactions")]
+        public ActionResult<PagedResultDto<WalletTransactionDto>> GetMyTransactions([FromQuery] int page = 1, [FromQuery] int pageSize = 10)
+            => Ok(_walletService.GetMyTransactions(GetPersonId(), page, pageSize));
+
     }
 }
