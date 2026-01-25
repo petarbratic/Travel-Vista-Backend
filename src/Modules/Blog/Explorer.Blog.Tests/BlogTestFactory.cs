@@ -2,6 +2,7 @@
 using Explorer.BuildingBlocks.Tests;
 using Explorer.Encounters.Infrastructure.Database;
 using Explorer.Payments.Infrastructure.Database;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.EntityFrameworkCore;
@@ -27,9 +28,14 @@ public class BlogTestFactory : BaseTestFactory<BlogContext>
         services.Remove(paymentsDescriptor!);
         services.AddDbContext<PaymentsContext>(SetupTestContext());
 
-        var encounterDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<Explorer.Encounters.Infrastructure.Database.EncountersContext>));
+        var encounterDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<EncountersContext>));
         services.Remove(encounterDescriptor!);
         services.AddDbContext<EncountersContext>(SetupTestContext());
+
+        var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
+        services.Remove(stakeholdersDescriptor!);
+        services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
 
         services.AddAuthentication("TestAuth")
            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestAuth", _ => { });

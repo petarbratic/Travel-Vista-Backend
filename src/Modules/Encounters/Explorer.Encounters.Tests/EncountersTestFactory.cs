@@ -1,5 +1,7 @@
-﻿using Explorer.BuildingBlocks.Tests;
+﻿using Explorer.Blog.Infrastructure.Database;
+using Explorer.BuildingBlocks.Tests;
 using Explorer.Encounters.Infrastructure.Database;
+using Explorer.Payments.Infrastructure.Database;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
@@ -26,6 +28,14 @@ namespace Explorer.Encounters.Tests
             var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
             services.Remove(stakeholdersDescriptor!);
             services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
+            var blogsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<BlogContext>));
+            services.Remove(blogsDescriptor!);
+            services.AddDbContext<BlogContext>(SetupTestContext());
+
+            var paymentsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
+            services.Remove(paymentsDescriptor!);
+            services.AddDbContext<PaymentsContext>(SetupTestContext());
 
             //descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<OTHER_MODULE_NAMEContext>));
             //services.Remove(descriptor!);
