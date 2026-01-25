@@ -13,8 +13,6 @@ namespace Explorer.Stakeholders.Core.Domain
         FiveToursCompleted,
         TenToursCompleted,
         FirstClubJoined,
-        FiveClubsJoined,
-        TenClubsJoined,
         FirstReviewWritten,
         FiveReviewsWritten,
         TenReviewsWritten,

@@ -9,5 +9,8 @@ namespace Explorer.Stakeholders.API.Internal
     public interface IInternalAchievementService
     {
         string BoughtTours(long touristId);
+        string CompletedTours(long touristId);
+        string ClubsJoined(long touristId);
+        string TourReviewsWritten(long touristId);
     }
 }

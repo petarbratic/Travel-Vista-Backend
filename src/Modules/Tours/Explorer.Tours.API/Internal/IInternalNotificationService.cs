@@ -7,5 +7,7 @@ namespace Explorer.Tours.API.Internal
         void CreateBundlePurchaseNotification(long touristId, long bundleId, string bundleName);
         void CreateTourOnSaleNotification(long recipientId, long tourId, string tourName, decimal discountPercentage);
         void CreateTourPurchaseAchievementNotification(long recipientId, string message);
+        void CreateTourCompletedAchievementNotification(long touristId, string message);
+        void CreateClubJoinedAchievementNotification(long touristId, string message);
     }
 }
