@@ -53,4 +53,10 @@ public class PersonDbRepository : IPersonRepository
     {
         return _dbSet.ToList();
     }
+
+    public Person? GetByEmail(string email)
+    {
+        var normalized = email.Trim().ToLower();
+        return _dbSet.FirstOrDefault(p => p.Email.ToLower() == normalized);
+    }
 }
