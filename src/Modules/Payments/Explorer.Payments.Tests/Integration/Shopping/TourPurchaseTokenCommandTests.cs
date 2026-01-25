@@ -1,12 +1,10 @@
-﻿
-using Explorer.API.Controllers.Shopping;
+﻿using Explorer.API.Controllers.Shopping;
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Public.Shopping;
 using Explorer.Payments.Infrastructure.Database;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
 using Shouldly;
-using System;
 using System.Linq;
 using Xunit;
 
@@ -17,15 +15,34 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
 {
     public TourPurchaseTokenCommandTests(PaymentsTestFactory factory) : base(factory) { }
 
-    private static string NewPersonId() => (-10000 - Guid.NewGuid().GetHashCode()).ToString();
+    private const string TestTourist1 = "-21";
+    private const string TestTourist2 = "-22";
+    private const string TestTourist3 = "-23";
+
+    // Helper za čišćenje korpe
+    private void ClearCart(IServiceScope scope, long touristId)
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+        var cart = db.ShoppingCarts.FirstOrDefault(c => c.TouristId == touristId);
+        if (cart != null)
+        {
+            cart.Clear();
+            db.SaveChanges();
+        }
+    }
 
     [Fact]
     public void Checkout_creates_single_token()
     {
-        var personId = NewPersonId();
+        var personId = TestTourist1;
+        var personIdLong = long.Parse(personId);
         var tourId = -2;
 
         using var scope = Factory.Services.CreateScope();
+
+        // Očisti korpu pre testa
+        ClearCart(scope, personIdLong);
+
         var cart = CreateCartController(scope, personId);
         var purchase = CreatePurchaseController(scope, personId);
 
@@ -34,8 +51,8 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
         var actionResult = purchase.Checkout();
         var okResult = actionResult.Result as OkObjectResult;
         okResult.ShouldNotBeNull();
-        var result = okResult.Value as CheckoutResultDto;
 
+        var result = okResult.Value as CheckoutResultDto;
         result.ShouldNotBeNull();
         result.Success.ShouldBeTrue();
         result.Tokens.Count.ShouldBe(1);
@@ -45,10 +62,15 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
     [Fact]
     public void Checkout_empties_cart()
     {
-        var personId = NewPersonId();
+        var personId = TestTourist2;
+        var personIdLong = long.Parse(personId);
         var tourId = -2;
 
         using var scope = Factory.Services.CreateScope();
+
+        // Očisti korpu pre testa
+        ClearCart(scope, personIdLong);
+
         var cartController = CreateCartController(scope, personId);
         var purchaseController = CreatePurchaseController(scope, personId);
         var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
@@ -58,11 +80,12 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
         var actionResult = purchaseController.Checkout();
         var okResult = actionResult.Result as OkObjectResult;
         okResult.ShouldNotBeNull();
+
         var checkoutResult = okResult.Value as CheckoutResultDto;
         checkoutResult.ShouldNotBeNull();
         checkoutResult.Success.ShouldBeTrue();
 
-        var storedCart = db.ShoppingCarts.First(c => c.TouristId == long.Parse(personId));
+        var storedCart = db.ShoppingCarts.First(c => c.TouristId == personIdLong);
         storedCart.Items.Count.ShouldBe(0);
         storedCart.TotalPrice.ShouldBe(0);
     }
@@ -70,12 +93,16 @@ public class TourPurchaseTokenCommandTests : BasePaymentsIntegrationTest
     [Fact]
     public void Checkout_fails_if_empty()
     {
-        var personId = NewPersonId();
+        var personId = TestTourist3;
+        var personIdLong = long.Parse(personId);
 
         using var scope = Factory.Services.CreateScope();
+
+        // Očisti korpu pre testa
+        ClearCart(scope, personIdLong);
+
         var purchaseController = CreatePurchaseController(scope, personId);
 
-        // Prazna korpa ne baca exception više, vraća BadRequest
         var actionResult = purchaseController.Checkout();
         actionResult.Result.ShouldBeOfType<BadRequestObjectResult>();
     }

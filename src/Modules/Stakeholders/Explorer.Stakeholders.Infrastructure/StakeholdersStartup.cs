@@ -12,6 +12,8 @@ using Explorer.Stakeholders.Infrastructure.FileStorage;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Npgsql;
+using AiChatService = Explorer.Stakeholders.Core.UseCases.AiChatService;
+using ElevenLabsService = Explorer.Stakeholders.Core.UseCases.ElevenLabsService;
 
 namespace Explorer.Stakeholders.Infrastructure;
 
@@ -29,10 +31,9 @@ public static class StakeholdersStartup
     {
         services.AddScoped<IAuthenticationService, AuthenticationService>();
         services.AddScoped<ITokenGenerator, JwtGenerator>();
-        services.AddScoped<IAccountService, AccountService>(); // DODATO anja
+        services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<IPersonService, PersonService>();
         services.AddScoped<IAppRatingService, AppRatingService>();
-
         services.AddScoped<IClubService, ClubService>(); // dodato petar s.
         services.AddScoped<IMeetupService, MeetupService>();
         services.AddScoped<IPreferenceService, PreferenceService>(); //preference
@@ -41,15 +42,18 @@ public static class StakeholdersStartup
         services.AddScoped<IInternalTouristXPAndLevelSerive, InternalTouristXPAndLevelService>();
         services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
         services.AddScoped<IInternalWalletService, WalletService>();
+        // AI Chat Services
+        services.AddHttpClient<IAiChatService, AiChatService>();
+        services.AddHttpClient<IElevenLabsService, ElevenLabsService>();
         services.AddScoped<IFirstTimeXpService, FirstTimeXpService>();
         services.AddScoped<ITouristXPService, TouristXPService>();
-
         services.AddScoped<IXpEventService, XpEventService>();
         services.AddScoped<IInternalXpEventService, InternalXpEventService>();
-
         services.AddScoped<IWelcomeBonusService, WelcomeBonusService>();
         services.AddScoped<IInternalWelcomeBonusService, WelcomeBonusService>();
-
+        services.AddScoped<IRankRewardService, RankRewardService>();
+        services.AddScoped<ITouristXPService, TouristXPService>();
+        services.AddScoped<IInternalTouristRankService, TouristXPService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -58,7 +62,6 @@ public static class StakeholdersStartup
         services.AddScoped<IUserRepository, UserDbRepository>();
         services.AddScoped<IAccountRepository, AccountDbRepository>(); // DODATO
         services.AddScoped<IAppRatingRepository, AppRatingDbRepository>();
-
         services.AddScoped<IClubRepository, ClubRepository>(); // dodato petar s.
         services.AddScoped<IImageStorageService, FileSystemImageStorageService>();
         services.AddScoped<IMeetupRepository, MeetupDbRepository>();
@@ -68,13 +71,11 @@ public static class StakeholdersStartup
         services.AddScoped<IAchievementRepository, AchievementDbRepository>();
         services.AddScoped<IFirstTimeXpService, FirstTimeXpService>();
         services.AddScoped<IWalletRepository, WalletDbRepository>();
-
         services.AddScoped<IClubJoinRequestRepository, ClubJoinRequestRepository>();
-
-
         services.AddScoped<IXpEventRepository, XpEventDbRepository>();
-
         services.AddScoped<IWelcomeBonusRepository, WelcomeBonusDbRepository>();
+        services.AddScoped<ITouristRankRewardsRepository, TouristRankRewardsRepository>();
+        services.AddScoped<IWalletTransactionRepository, WalletTransactionDbRepository>();
 
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("stakeholders"));
         dataSourceBuilder.EnableDynamicJson();
