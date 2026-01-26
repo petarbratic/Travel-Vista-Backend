@@ -13,5 +13,6 @@ public enum NotificationType
     TourCompleteAchievement = 9,
     ClubJoinAchievement = 10,
     TourReviewAchievement = 11,
-    ProfilePictureAchievement = 12
+    ProfilePictureAchievement = 12,
+    AppReviewAchievement = 13
 }
