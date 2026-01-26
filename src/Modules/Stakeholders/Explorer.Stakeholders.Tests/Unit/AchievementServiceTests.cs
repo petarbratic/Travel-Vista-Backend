@@ -13,9 +13,10 @@ namespace Explorer.Stakeholders.Tests.Unit.Achievements;
 public class AchievementServiceTests
 {
     private readonly Mock<IAchievementRepository> _repo = new();
+    private readonly Mock<IXpEventRepository> _repoXpEvent = new();
     private readonly Mock<IMapper> _mapper = new();
 
-    private AchievementService CreateSut() => new AchievementService(_repo.Object, _mapper.Object);
+    private AchievementService CreateSut() => new AchievementService(_repo.Object, _repoXpEvent.Object, _mapper.Object);
 
     [Fact]
     public void Create_throws_when_code_is_invalid()

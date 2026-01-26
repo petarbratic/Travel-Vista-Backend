@@ -10,5 +10,6 @@ namespace Explorer.Stakeholders.API.Public
     public interface IAchievementService
     {
         AchievementDto Create(AchievementDto achievement, long touristId);
+        string BlogCreated(long touristId);
     }
 }

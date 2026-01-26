@@ -5,6 +5,7 @@ using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.UseCases;
 using Explorer.Tours.API.Internal;
+using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -243,8 +244,8 @@ namespace Explorer.Blog.Tests.Integration
         private static BlogController CreateController(IServiceScope scope)
         {
             return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>(),
-                                      scope.ServiceProvider.GetRequiredService<IInternalAchievementService>(),
-                                      scope.ServiceProvider.GetRequiredService<IInternalNotificationService>());
+                                      scope.ServiceProvider.GetRequiredService<IAchievementService>(),
+                                      scope.ServiceProvider.GetRequiredService<INotificationService>());
         }
     }
 }

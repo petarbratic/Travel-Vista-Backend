@@ -15,4 +15,5 @@ public interface INotificationService
     UnreadCountDto GetUnreadCount(long userId);
     NotificationDto MarkAsRead(long notificationId, long userId);
     MarkAllReadResultDto MarkAllAsRead(long userId);
+    void CreateAchievementNotification(long touristId, string message);
 }

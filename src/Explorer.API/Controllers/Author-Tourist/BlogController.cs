@@ -1,6 +1,5 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
-using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.UseCases;
@@ -20,13 +19,13 @@ namespace Explorer.API.Controllers.Author_Tourist
     public class BlogController : ControllerBase
     {
         private readonly IBlogService _blogService;
-        private readonly IInternalAchievementService _achievementService;
-        private readonly IInternalNotificationService _notificationService;
+        private readonly IAchievementService _achievementService;
+        private readonly INotificationService _notificationService;
         private readonly IFirstTimeXpService? _firstTimeXpService;
 
         public BlogController(IBlogService blogService, 
-            IInternalAchievementService achievementService, 
-            IInternalNotificationService notificationService, 
+            IAchievementService achievementService, 
+            INotificationService notificationService,
             IFirstTimeXpService? firstTimeXpService = null)
         {
             _blogService = blogService;

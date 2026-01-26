@@ -14,11 +14,13 @@ namespace Explorer.Stakeholders.Core.UseCases
     public class AchievementService : IAchievementService
     {
         private readonly IAchievementRepository _achievementRepository;
+        private readonly IXpEventRepository _xpEventRepository;
         private readonly IMapper _mapper;
 
-        public AchievementService(IAchievementRepository achievementRepository, IMapper mapper)
+        public AchievementService(IAchievementRepository achievementRepository, IXpEventRepository xpEventRepository, IMapper mapper)
         {
             _achievementRepository = achievementRepository;
+            _xpEventRepository = xpEventRepository;
             _mapper = mapper;
         }
 
@@ -47,6 +49,20 @@ namespace Explorer.Stakeholders.Core.UseCases
             (dto.Name, dto.Description) = GetMeta(created.Code);
 
             return dto;
+        }
+
+        public string BlogCreated(long touristId)
+        {
+            // Event type: jedan dogadjaj kad se uclani u klub
+            var blogCreatedCount = _xpEventRepository.CountByType(touristId, Domain.XpEventType.FirstBlogCreated);
+
+            // Ako se nije uclanio nijednom, nista
+            if (blogCreatedCount < 1)
+                return "";
+
+            // Otkljucaj jednom
+            //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
+            return AchievementCode.FirstBlogCreated.ToString();
         }
 
         private static (string Name, string Description) GetMeta(AchievementCode code)
