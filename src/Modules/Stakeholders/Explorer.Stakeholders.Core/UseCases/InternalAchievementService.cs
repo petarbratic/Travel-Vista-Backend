@@ -102,5 +102,19 @@ namespace Explorer.Stakeholders.Core.UseCases
             return string.Join(", ", newlyUnlocked.Select(c => c.ToString()));
         }
 
+        public string ProfilePictureChanged(long touristId)
+        {
+            // Event type: jedan dogadjaj kad se uclani u klub
+            var pictureSetCount = _xpEventRepository.CountByType(touristId, Domain.XpEventType.FirstProfilePictureSet);
+
+            // Ako se nije uclanio nijednom, nista
+            if (pictureSetCount < 1)
+                return "";
+
+            // Otkljucaj jednom
+            //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
+            return AchievementCode.FirstClubJoined.ToString();
+        }
+
     }
 }
