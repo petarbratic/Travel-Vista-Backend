@@ -1,8 +1,11 @@
 ﻿using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.Core.UseCases;
+using Explorer.Tours.API.Internal;
+using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -17,11 +20,18 @@ namespace Explorer.API.Controllers.Author_Tourist
     public class BlogController : ControllerBase
     {
         private readonly IBlogService _blogService;
+        private readonly IInternalAchievementService _achievementService;
+        private readonly IInternalNotificationService _notificationService;
         private readonly IFirstTimeXpService? _firstTimeXpService;
 
-        public BlogController(IBlogService blogService, IFirstTimeXpService? firstTimeXpService = null)
+        public BlogController(IBlogService blogService, 
+            IInternalAchievementService achievementService, 
+            IInternalNotificationService notificationService, 
+            IFirstTimeXpService? firstTimeXpService = null)
         {
             _blogService = blogService;
+            _achievementService = achievementService;
+            _notificationService = notificationService;
             _firstTimeXpService = firstTimeXpService;
         }
 
@@ -46,6 +56,11 @@ namespace Explorer.API.Controllers.Author_Tourist
 
             // NOVO: Award XP ako je turista (automatski proverava)
             _firstTimeXpService?.TryAwardFirstBlogCreationByUserId(userId, result.Id);
+
+            string message = _achievementService.BlogCreated(userId);
+
+            if(!String.Equals(message, ""))
+                _notificationService.CreateBlogCreatedAchievementNotification(userId, message);
 
             return CreatedAtAction(nameof(GetBlogById), new { id = result.Id }, result);
         }

@@ -12,5 +12,6 @@ namespace Explorer.Tours.API.Internal
         void CreateTourReviewAchievementNotification(long touristId, string message);
         void CreateProfilePicutreAchievementNotification(long touristId, string message);
         void CreateAppReviewAchievementNotification(long touristId, string message);
+        void CreateBlogCreatedAchievementNotification(long touristid, string message);
     }
 }

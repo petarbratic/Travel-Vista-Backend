@@ -13,5 +13,6 @@ namespace Explorer.Stakeholders.API.Internal
         string ClubsJoined(long touristId);
         string TourReviewsWritten(long touristId);
         string ProfilePictureChanged(long touristId);
+        string BlogCreated(long touristId);
     }
 }

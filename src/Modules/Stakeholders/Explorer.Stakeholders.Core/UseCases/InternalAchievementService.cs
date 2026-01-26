@@ -113,7 +113,20 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             // Otkljucaj jednom
             //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
-            return AchievementCode.FirstClubJoined.ToString();
+            return AchievementCode.FirstProfilePictureSet.ToString();
+        }
+        public string BlogCreated(long touristId)
+        {
+            // Event type: jedan dogadjaj kad se uclani u klub
+            var blogCreatedCount = _xpEventRepository.CountByType(touristId, Domain.XpEventType.FirstBlogCreated);
+
+            // Ako se nije uclanio nijednom, nista
+            if (blogCreatedCount < 1)
+                return "";
+
+            // Otkljucaj jednom
+            //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
+            return AchievementCode.FirstBlogCreated.ToString();
         }
 
     }
