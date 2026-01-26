@@ -68,6 +68,7 @@ public static class ToursStartup
         services.AddScoped<ICouponService, CouponService>();
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<ITourWishlistService, TourWishlistService>();
+        services.AddScoped<ITourHistoryService, TourHistoryService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

@@ -14,4 +14,9 @@ public interface ITourExecutionRepository
     TourExecution Update(TourExecution execution); // task2
     TourExecution? GetActiveExecution(long touristId, long tourId); // task2
     TourExecution? GetLatestForTouristAndTour(long touristId, long tourId); //task3
+
+    // metode za tour history
+    List<TourExecution> GetCompletedByTouristId(long touristId);
+    List<TourExecution> GetAllCompleted();
+    int GetTotalPurchasedToursCount(long touristId);
 }
