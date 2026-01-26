@@ -10,10 +10,12 @@ namespace Explorer.Tours.API.Dtos
     {
         public long Id { get; set; }
         public long TourId { get; set; }
+        public string? TourName { get; set; }
         public long ClubId { get; set; }
         public int Status { get; set; }
         public DateTime StartTime { get; set; }
         public long StarterId { get; set; }
+        public long IsHighlighted { get; set; }
 
         public List<GroupTourSessionParticipantDto> Participants { get; set; } = new List<GroupTourSessionParticipantDto>();
     }

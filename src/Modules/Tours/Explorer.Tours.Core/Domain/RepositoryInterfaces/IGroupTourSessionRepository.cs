@@ -11,7 +11,8 @@ namespace Explorer.Tours.Core.Domain.RepositoryInterfaces
         GroupTourSession Update(GroupTourSession session);
         GroupTourSession? FindById(long id);
         List<GroupTourSession> FindActiveByClubId(long clubId);
-        List<GroupTourSession> FindEndedByClubId(long clubId);
+        List<GroupTourSession> FindHighlightedByClubId(long clubId);
+        List<GroupTourSession> FindSessionsForHighlightMarking(long clubId);
         List<GroupTourSession> FindByClubId(long clubId);
         List<GroupTourSessionParticipant>? FindOtherGroupParticipantsByTouristId(long touristId);
 

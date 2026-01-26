@@ -10,16 +10,19 @@ namespace Explorer.Tours.Core.Domain
     public class GroupTourSession : AggregateRoot
     {
         public long TourId { get; private set; }
+        public string TourName { get; private set; }
         public long ClubId { get; private set; }
         public GroupTourSessionStatus Status { get; private set; }
         public DateTime StartTime { get; private set; }
         public long StarterId { get; private set; }
 
+        public bool? IsHighlighted { get; private set; } = null;
+
         public List<GroupTourSessionParticipant> Participants { get; private set; } = new List<GroupTourSessionParticipant>();
 
         private GroupTourSession() { }
 
-        public GroupTourSession(long tourId, long clubId, long starterId)
+        public GroupTourSession(long tourId, string tourName, long clubId, long starterId)
         {
             if (tourId == 0)
                 throw new ArgumentException("Tour ID must be valid.", nameof(tourId));
@@ -28,10 +31,25 @@ namespace Explorer.Tours.Core.Domain
             if (starterId == 0)
                 throw new ArgumentException("Starter ID must be valid.", nameof(starterId));
             TourId = tourId;
+            TourName = tourName;
             ClubId = clubId;
             Status = GroupTourSessionStatus.Active;
             StartTime = DateTime.UtcNow;
             StarterId = starterId;
+        }
+
+        public void Highlight()
+        {
+            if (!IsEnded)
+                throw new InvalidOperationException("Cannot highlight an active session.");
+            IsHighlighted = true;
+        }
+
+        public void RefuseHighlight()
+        {
+            if (!IsEnded)
+                throw new InvalidOperationException("Cannot refuse highlight for an active session.");
+            IsHighlighted = false;
         }
 
         public GroupTourSessionParticipant JoinParticipant(long touristId, long tourExecutionId)

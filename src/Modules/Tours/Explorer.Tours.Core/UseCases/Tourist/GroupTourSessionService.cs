@@ -70,9 +70,27 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             return result;
         }
 
-        public List<GroupTourSessionDto> GetEndedSessionsByClubId(long clubId)
+        public List<GroupTourSessionDto> GetHighlightedSessionsByClubId(long clubId)
         {
-            var sessions = _groupTourSessionRepository.FindEndedByClubId(clubId);
+            var sessions = _groupTourSessionRepository.FindHighlightedByClubId(clubId);
+            if (sessions == null || !sessions.Any())
+            {
+                return new List<GroupTourSessionDto>();
+            }
+            var result = new List<GroupTourSessionDto>();
+
+            foreach (var session in sessions)
+            {
+                var dto = _mapper.Map<GroupTourSessionDto>(session);
+                result.Add(dto);
+            }
+
+            return result;
+        }
+
+        public List<GroupTourSessionDto> GetSessionsForHighlightMarking(long clubId)
+        {
+            var sessions = _groupTourSessionRepository.FindSessionsForHighlightMarking(clubId);
             if (sessions == null || !sessions.Any())
             {
                 return new List<GroupTourSessionDto>();
@@ -119,6 +137,7 @@ namespace Explorer.Tours.Core.UseCases.Tourist
 
             var session = new GroupTourSession(
                 createDto.TourId,
+                createDto.TourName,
                 createDto.ClubId,
                 starterId);
 
@@ -170,6 +189,26 @@ namespace Explorer.Tours.Core.UseCases.Tourist
             _groupTourSessionRepository.AddParticipant(participant);
             _groupTourSessionRepository.Update(session);
 
+            return _mapper.Map<GroupTourSessionDto>(session);
+        }
+
+        public GroupTourSessionDto HighlightGroupTourSession(long sessionId)
+        {
+            var session = _groupTourSessionRepository.FindById(sessionId);
+            if (session == null)
+                throw new KeyNotFoundException($"Group tour session not found");
+            session.Highlight();
+            _groupTourSessionRepository.Update(session);
+            return _mapper.Map<GroupTourSessionDto>(session);
+        }
+
+        public GroupTourSessionDto RefuseHighlightGroupTourSession(long sessionId)
+        {
+            var session = _groupTourSessionRepository.FindById(sessionId);
+            if (session == null)
+                throw new KeyNotFoundException($"Group tour session not found");
+            session.RefuseHighlight();
+            _groupTourSessionRepository.Update(session);
             return _mapper.Map<GroupTourSessionDto>(session);
         }
     }

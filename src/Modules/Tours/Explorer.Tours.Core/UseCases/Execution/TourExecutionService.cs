@@ -11,6 +11,7 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.API.Internal;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.API.Public.Tourist;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -29,6 +30,7 @@ public class TourExecutionService : ITourExecutionService
 
     private readonly IGroupTourSessionCleanup _groupTourSessionCleanup;
     private readonly ITourService _tourService;
+    private readonly ITouristTourService _touristTourService;
 
     private readonly IMapper _mapper;
 
@@ -89,10 +91,10 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Cannot start: Tour is not available.");
 
         // Validacija kupovine
-        // var hasPurchased = _shoppingCartService.HasPurchasedTour(touristId, dto.TourId);
-        // if (!hasPurchased)
-        //    throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
-
+        var hasPurchased = _tokenService.GetTokens(touristId)
+            .Any(t => t.TourId == dto.TourId);
+        if (!hasPurchased)
+            throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
 
         // Provera broja ključnih tačaka
         var keyPointCount = tour.KeyPoints?.Count ?? 0;

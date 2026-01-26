@@ -53,11 +53,20 @@ namespace Explorer.Tours.Infrastructure.Database.Repositories
             return sessions;
         }
 
-        public List<GroupTourSession> FindEndedByClubId(long clubId)
+        public List<GroupTourSession> FindHighlightedByClubId(long clubId)
         {
             var sessions = _context.GroupTourSessions
                 .Include(s => s.Participants)
-                .Where(s => s.ClubId == clubId && s.Status == GroupTourSessionStatus.Ended)
+                .Where(s => s.ClubId == clubId && s.Status == GroupTourSessionStatus.Ended && s.IsHighlighted == true)
+                .ToList();
+            return sessions;
+        }
+
+        public List<GroupTourSession> FindSessionsForHighlightMarking(long clubId)
+        {
+            var sessions = _context.GroupTourSessions
+                .Include(s => s.Participants)
+                .Where(s => s.ClubId == clubId && s.Status == GroupTourSessionStatus.Ended && s.IsHighlighted == null)
                 .ToList();
             return sessions;
         }

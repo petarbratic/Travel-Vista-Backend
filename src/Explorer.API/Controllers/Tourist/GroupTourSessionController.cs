@@ -60,12 +60,26 @@ namespace Explorer.API.Controllers.Tourist
             }
         }
 
-        [HttpGet("club/ended")]
-        public ActionResult<List<GroupTourSessionDto>> GetEndedSessionsByClubId([FromQuery] long clubId)
+        [HttpGet("club/highlighted")]
+        public ActionResult<List<GroupTourSessionDto>> GetHighlightedSessionsByClubId([FromQuery] long clubId)
         {
             try
             {
-                var sessions = _groupTourSessionService.GetEndedSessionsByClubId(clubId);
+                var sessions = _groupTourSessionService.GetHighlightedSessionsByClubId(clubId);
+                return Ok(sessions);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+        }
+
+        [HttpGet("club/highlight-marking")]
+        public ActionResult<List<GroupTourSessionDto>> GetSessionsForHighlightMarking([FromQuery] long clubId)
+        {
+            try
+            {
+                var sessions = _groupTourSessionService.GetSessionsForHighlightMarking(clubId);
                 return Ok(sessions);
             }
             catch (KeyNotFoundException ex)
@@ -127,6 +141,42 @@ namespace Explorer.API.Controllers.Tourist
             try
             {
                 var session = _groupTourSessionService.JoinGroupTourSession(sessionId, touristId);
+                return Ok(session);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("highlight")]
+        public ActionResult<GroupTourSessionDto> HighlightGroupTourSession([FromQuery] long sessionId)
+        {
+            try
+            {
+                var session = _groupTourSessionService.HighlightGroupTourSession(sessionId);
+                return Ok(session);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                return NotFound(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPost("refuse-highlight")]
+        public ActionResult<GroupTourSessionDto> RefuseHighlightGroupTourSession([FromQuery] long sessionId)
+        {
+            try
+            {
+                var session = _groupTourSessionService.RefuseHighlightGroupTourSession(sessionId);
                 return Ok(session);
             }
             catch (KeyNotFoundException ex)

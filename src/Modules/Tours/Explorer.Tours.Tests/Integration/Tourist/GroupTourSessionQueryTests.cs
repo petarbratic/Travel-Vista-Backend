@@ -142,7 +142,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
 
             teController.AbandonTour();
 
-            var result = controller.GetEndedSessionsByClubId(-2);
+            var result = controller.GetHighlightedSessionsByClubId(-2);
             var sessions = (result.Result as OkObjectResult)!.Value as IEnumerable<GroupTourSessionDto>;
             sessions!.Count().ShouldBe(1);
         }
