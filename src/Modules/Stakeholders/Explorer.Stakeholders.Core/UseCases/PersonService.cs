@@ -84,7 +84,7 @@ public class PersonService : IPersonService
                 string message = _achievementService.ProfilePictureChanged(tourist.Id);
 
                 if(!String.Equals(message, ""))
-                    _notificationService.CreateProfilePicutreAchievementNotification(tourist.Id, message);
+                    _notificationService.CreateAchievementNotification(tourist.Id, message);
 
             }
         }

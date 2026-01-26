@@ -9,11 +9,5 @@ public enum NotificationType
     TourPurchased = 5,
     BundlePurchase = 6,
     TourOnSale = 7,
-    TourPurchaseAchievement = 8,
-    TourCompleteAchievement = 9,
-    ClubJoinAchievement = 10,
-    TourReviewAchievement = 11,
-    ProfilePictureAchievement = 12,
-    AppReviewAchievement = 13,
-    BlogCreatedAchievement = 14
+    Achievement = 8
 }

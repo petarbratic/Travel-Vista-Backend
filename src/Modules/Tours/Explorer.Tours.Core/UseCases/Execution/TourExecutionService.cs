@@ -212,7 +212,7 @@ public class TourExecutionService : ITourExecutionService
         string message = _achievementService.CompletedTours(touristId);
 
         if(!String.Equals(message, ""))
-            _notificationService.CreateTourCompletedAchievementNotification(touristId, message);
+            _notificationService.CreateAchievementNotification(touristId, message);
 
         return _mapper.Map<TourExecutionDto>(updated);
     }

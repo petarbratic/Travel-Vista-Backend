@@ -60,7 +60,7 @@ namespace Explorer.API.Controllers.Author_Tourist
             string message = _achievementService.BlogCreated(userId);
 
             if(!String.Equals(message, ""))
-                _notificationService.CreateBlogCreatedAchievementNotification(userId, message);
+                _notificationService.CreateAchievementNotification(userId, message);
 
             return CreatedAtAction(nameof(GetBlogById), new { id = result.Id }, result);
         }

@@ -91,7 +91,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                 string message = _achievementService.ClubsJoined(request.TouristId);
 
                 if (!String.Equals(message, ""))
-                    _notificationService.CreateClubJoinedAchievementNotification(request.TouristId, message);
+                    _notificationService.CreateAchievementNotification(request.TouristId, message);
             }
 
             _requestRepository.Delete(requestId);

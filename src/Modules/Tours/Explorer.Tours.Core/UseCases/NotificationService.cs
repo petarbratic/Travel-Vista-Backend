@@ -189,99 +189,18 @@ public class NotificationService : INotificationService, IInternalNotificationSe
         var notificationDto = _mapper.Map<NotificationDto>(notification);
         _ = _publisher.PublishAsync(notificationDto);
     }
-
-    public void CreateTourPurchaseAchievementNotification(long recipientId, string message)
-    {
-        var notification = new Notification(
-            recipientId: recipientId,
-            type: NotificationType.TourPurchaseAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
-            message: message
-        );
-
-        _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
-    }
-
-    public void CreateTourCompletedAchievementNotification(long touristId, string message)
+    public void CreateAchievementNotification(long touristId, string message)
     {
         var notification = new Notification(
             recipientId: touristId,
-            type: NotificationType.TourCompleteAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
+            type: NotificationType.Achievement,
+            relatedEntityId: 1,
             message: message
         );
 
         _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
-    }
-    public void CreateClubJoinedAchievementNotification(long touristId, string message)
-    {
-        var notification = new Notification(
-            recipientId: touristId,
-            type: NotificationType.ClubJoinAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
-            message: message
-        );
-
-        _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
-    }
-
-    public void CreateTourReviewAchievementNotification(long touristId, string message)
-    {
-        var notification = new Notification(
-            recipientId: touristId,
-            type: NotificationType.TourReviewAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
-            message: message
-        );
-
-        _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
-    }
-    public void CreateProfilePicutreAchievementNotification(long touristId, string message)
-    {
-        var notification = new Notification(
-            recipientId: touristId,
-            type: NotificationType.ProfilePictureAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
-            message: message
-        );
-
-        _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
-    }
-    public void CreateAppReviewAchievementNotification(long touristId, string message)
-    {
-        var notification = new Notification(
-            recipientId: touristId,
-            type: NotificationType.AppReviewAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
-            message: message
-        );
-
-        _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
-    }
-    public void CreateBlogCreatedAchievementNotification(long touristId, string message)
-    {
-        var notification = new Notification(
-            recipientId: touristId,
-            type: NotificationType.BlogCreatedAchievement,
-            relatedEntityId: 1, // not the best practice, but ...
-            message: message
-        );
-
-        _notificationRepository.Create(notification);
-        var notificationDto = _mapper.Map<NotificationDto>(notification);
-        _ = _publisher.PublishAsync(notificationDto);
+        var dto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(dto);
     }
 
 }

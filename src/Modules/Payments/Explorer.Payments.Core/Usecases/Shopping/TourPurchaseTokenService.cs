@@ -160,7 +160,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                     string message = _achievementService.BoughtTours(touristId);
 
                     if (!String.Equals(message, ""))
-                        _notificationService.CreateTourPurchaseAchievementNotification(touristId, message);
+                        _notificationService.CreateAchievementNotification(touristId, message);
 
                     Console.WriteLine($"    Record created: ID={createdRecord.Id}");
 

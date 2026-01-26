@@ -111,7 +111,7 @@ public class TourReviewService : ITourReviewService
         string message = _achievementService.TourReviewsWritten(touristId);
 
         if (!String.Equals(message, ""))
-            _notificationService.CreateTourReviewAchievementNotification(touristId, message);
+            _notificationService.CreateAchievementNotification(touristId, message);
 
         return MapReviewToDto(created);
     }
