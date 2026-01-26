@@ -9,5 +9,6 @@ namespace Explorer.Tours.API.Internal
         void CreateTourPurchaseAchievementNotification(long recipientId, string message);
         void CreateTourCompletedAchievementNotification(long touristId, string message);
         void CreateClubJoinedAchievementNotification(long touristId, string message);
+        void CreateTourReviewAchievementNotification(long touristId, string message);
     }
 }
