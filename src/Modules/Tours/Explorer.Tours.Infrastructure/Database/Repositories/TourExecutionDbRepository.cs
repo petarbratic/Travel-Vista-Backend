@@ -62,4 +62,28 @@ public class TourExecutionDbRepository : ITourExecutionRepository
             .OrderByDescending(te => te.LastActivity)
             .FirstOrDefault();
     }
+
+    // metode za tour history
+    public List<TourExecution> GetCompletedByTouristId(long touristId)
+    {
+        return _context.TourExecutions
+            .Where(te => te.TouristId == touristId && te.Status == TourExecutionStatus.Completed)
+            .OrderByDescending(te => te.CompletionTime)
+            .ToList();
+    }
+
+    public List<TourExecution> GetAllCompleted()
+    {
+        return _context.TourExecutions
+            .Where(te => te.Status == TourExecutionStatus.Completed)
+            .ToList();
+    }
+
+    public List<long> GetAllTouristIds()
+    {
+        return _context.TourExecutions
+            .Select(te => te.TouristId)
+            .Distinct()
+            .ToList();
+    }
 }

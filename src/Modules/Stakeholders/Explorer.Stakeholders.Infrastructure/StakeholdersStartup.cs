@@ -42,6 +42,7 @@ public static class StakeholdersStartup
         services.AddScoped<IInternalTouristXPAndLevelSerive, InternalTouristXPAndLevelService>();
         services.AddScoped<IClubJoinRequestService, ClubJoinRequestService>();
         services.AddScoped<IInternalWalletService, WalletService>();
+        services.AddScoped<IInternalTouristService, InternalTouristService>(); 
         // AI Chat Services
         services.AddHttpClient<IAiChatService, AiChatService>();
         services.AddHttpClient<IElevenLabsService, ElevenLabsService>();
