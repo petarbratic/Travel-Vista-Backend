@@ -23,6 +23,8 @@ public class TourExecution : AggregateRoot
 
     public double ProgressPercentage { get; private set; } //task3
 
+    public long? GroupSessionId { get; private set; } 
+
 
     private TourExecution() { }
 
@@ -46,6 +48,29 @@ public class TourExecution : AggregateRoot
         LastActivity = DateTime.UtcNow; // task2
         CompletedKeyPoints = new List<KeyPointCompletion>();//task2
         ProgressPercentage = 0; //task3
+    }
+
+    public TourExecution(long touristId, long tourId, double startLatitude, double startLongitude, long? groupSessionId)
+    {
+        if (touristId == 0)
+            throw new ArgumentException("Tourist ID must be valid.", nameof(touristId));
+        if (tourId == 0)
+            throw new ArgumentException("Tour ID must be valid.", nameof(tourId));
+        if (startLatitude < -90 || startLatitude > 90)
+            throw new ArgumentException("Latitude must be between -90 and 90.", nameof(startLatitude));
+        if (startLongitude < -180 || startLongitude > 180)
+            throw new ArgumentException("Longitude must be between -180 and 180.", nameof(startLongitude));
+
+        TouristId = touristId;
+        TourId = tourId;
+        StartTime = DateTime.UtcNow;
+        Status = TourExecutionStatus.Active;
+        StartLatitude = startLatitude;
+        StartLongitude = startLongitude;
+        LastActivity = DateTime.UtcNow; // task2
+        CompletedKeyPoints = new List<KeyPointCompletion>();//task2
+        ProgressPercentage = 0; //task3
+        GroupSessionId = groupSessionId;
     }
 
 
