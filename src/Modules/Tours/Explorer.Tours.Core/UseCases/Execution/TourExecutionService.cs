@@ -11,6 +11,8 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.API.Internal;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.API.Public.Tourist;
 
 namespace Explorer.Tours.Core.UseCases.Execution;
 
@@ -29,6 +31,10 @@ public class TourExecutionService : ITourExecutionService
 
     private readonly IInternalXpEventService _xpEventService;
 
+    private readonly IGroupTourSessionCleanup _groupTourSessionCleanup;
+    private readonly ITourService _tourService;
+    private readonly ITouristTourService _touristTourService;
+
     private readonly IMapper _mapper;
 
     public TourExecutionService(
@@ -45,6 +51,9 @@ public class TourExecutionService : ITourExecutionService
 
         IInternalXpEventService xpEventService,
 
+        IGroupTourSessionCleanup groupTourSessionCleanup,
+        ITourService tourService,
+
         IMapper mapper)
     {
         _executionRepository = executionRepository;
@@ -60,6 +69,9 @@ public class TourExecutionService : ITourExecutionService
 
         _xpEventService = xpEventService;
 
+        _groupTourSessionCleanup = groupTourSessionCleanup;
+        _tourService = tourService;
+
         _mapper = mapper;
     }
 
@@ -71,7 +83,7 @@ public class TourExecutionService : ITourExecutionService
         if (existingActiveExecution != null)
         {
             throw new InvalidOperationException(
-                $"Cannot start: You already have an active tour (ID: {existingActiveExecution.TourId}). " +
+                $"Cannot start: You already have an active tour. " +
                 "Please complete or abandon it first."
             );
         }
@@ -86,10 +98,10 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Cannot start: Tour is not available.");
 
         // Validacija kupovine
-        // var hasPurchased = _shoppingCartService.HasPurchasedTour(touristId, dto.TourId);
-        // if (!hasPurchased)
-        //    throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
-
+        var hasPurchased = _tokenService.GetTokens(touristId)
+            .Any(t => t.TourId == dto.TourId);
+        if (!hasPurchased)
+            throw new InvalidOperationException("Cannot start: Tour must be purchased first.");
 
         // Provera broja ključnih tačaka
         var keyPointCount = tour.KeyPoints?.Count ?? 0;
@@ -100,11 +112,17 @@ public class TourExecutionService : ITourExecutionService
             throw new InvalidOperationException("Cannot start: You already have an active session for this tour.");
 
         // Kreiranje nove sesije
+        //touristId,
+        //dto.TourId,
+        //dto.StartLatitude,
+        //dto.StartLongitude,
+        //dto.GroupSessionId
         var execution = new TourExecution(
             touristId,
             dto.TourId,
             dto.StartLatitude,
-            dto.StartLongitude
+            dto.StartLongitude,
+            dto.GroupSessionId            
         );
 
         var created = _executionRepository.Create(execution);
@@ -119,6 +137,20 @@ public class TourExecutionService : ITourExecutionService
             return null;
 
         return _mapper.Map<TourExecutionDto>(activeExecution);
+    }
+
+    public TourDto? GetActiveTourByTouristId(long touristId)
+    {
+        var activeTourExecution = GetActiveTourExecution(touristId);
+
+        if (activeTourExecution == null)
+            return null;
+
+        var activeTour = _tourService.GetById(activeTourExecution.TourId);
+        if (activeTour == null)
+            throw new KeyNotFoundException("No tour found for the active tour execution.");
+
+        return activeTour;
     }
 
     //task2
@@ -195,6 +227,8 @@ public class TourExecutionService : ITourExecutionService
         }
 
         //  AKO SU SVE KOMPLETIRANE, DOZVOLI COMPLETE
+        if (activeExecution.GroupSessionId != null)
+            _groupTourSessionCleanup.HandleComplete(activeExecution.Id);
         activeExecution.Complete();
         var updated = _executionRepository.Update(activeExecution);
 
@@ -208,6 +242,9 @@ public class TourExecutionService : ITourExecutionService
         var activeExecution = _executionRepository.GetActiveByTouristId(touristId);
         if (activeExecution == null)
             throw new NotFoundException("No active tour session found.");
+
+        if (activeExecution.GroupSessionId != null)
+            _groupTourSessionCleanup.HandleAbandon(activeExecution.Id);
 
         activeExecution.Abandon();
         var updated = _executionRepository.Update(activeExecution);

@@ -1,4 +1,5 @@
 ﻿using Explorer.Tours.API.Dtos;
+using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.API.Public.Execution;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -43,6 +44,16 @@ public class TourExecutionController : ControllerBase
             return Ok(null);
 
         return Ok(activeTourExecution);
+    }
+
+    [HttpGet("active/{touristId:long}")]
+    public ActionResult<TourDto> GetActiveTourByTouristId(long touristId)
+    {
+        var activeTour = _tourExecutionService.GetActiveTourByTouristId(touristId);
+        if (activeTour == null)
+            return Ok(null);
+
+        return Ok(activeTour);
     }
 
     [HttpGet("active-with-next-keypoint")]
