@@ -144,7 +144,7 @@ public class TourExecutionService : ITourExecutionService
         var activeTourExecution = GetActiveTourExecution(touristId);
 
         if (activeTourExecution == null)
-            throw new KeyNotFoundException("No active tour execution found for the given tourist ID.");
+            return null;
 
         var activeTour = _tourService.GetById(activeTourExecution.TourId);
         if (activeTour == null)

@@ -5,6 +5,7 @@ using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -27,7 +28,15 @@ namespace Explorer.Tours.Core.UseCases.Execution
         public long StartGroupExecution(long tourId, long touristId, long sessionId)
         {
             var position = _positionService.GetForTourist(touristId);
-
+            if (position == null)
+            {
+                position = new PositionDto
+                {
+                    TouristId = touristId,
+                    Latitude = 0,
+                    Longitude = 0
+                };
+            }
             var execution = _tourExecutionService.StartTour(
                 new TourExecutionCreateDto
                 {
