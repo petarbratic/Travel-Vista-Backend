@@ -79,13 +79,11 @@ public class TourExecutionDbRepository : ITourExecutionRepository
             .ToList();
     }
 
-    public int GetTotalPurchasedToursCount(long touristId)
+    public List<long> GetAllTouristIds()
     {
-        // Distinct TourId-ove koje je turista startovao (bilo kakav execution)
         return _context.TourExecutions
-            .Where(te => te.TouristId == touristId)
-            .Select(te => te.TourId)
+            .Select(te => te.TouristId)
             .Distinct()
-            .Count();
+            .ToList();
     }
 }

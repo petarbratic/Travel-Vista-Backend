@@ -1,7 +1,6 @@
 ﻿using Explorer.API.Controllers.Tourist.Execution;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
-using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Http;
@@ -48,23 +47,23 @@ public class TourHistoryQueryTests : BaseToursIntegrationTest
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-22");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var controller = CreateController(scope, "-22");
 
         CleanupTourist(dbContext, -22);
-        CreateCompletedToursForTourist(dbContext, -22, 2);
+        CreateCompletedToursForTourist(dbContext, -22, 2); 
 
         // Act
         var result = controller.GetTourHistory();
 
         // Assert
+        result.Result.ShouldBeOfType<OkObjectResult>();
         var data = ((OkObjectResult)result.Result).Value as TourHistoryOverviewDto;
 
         data.Statistics.ShouldNotBeNull();
         data.Statistics.TotalCompletedTours.ShouldBe(2);
         data.Statistics.TotalDistanceTraveled.ShouldBe(20.0); // 5.0 + 15.0
         data.Statistics.TotalTimeSpent.ShouldBeGreaterThan(0);
-        data.Statistics.CompletionRate.ShouldBeGreaterThan(0);
     }
 
     [Fact]
@@ -136,22 +135,15 @@ public class TourHistoryQueryTests : BaseToursIntegrationTest
     }
 
     [Fact]
-    public void Completion_rate_is_calculated_correctly()
+    public void Statistics_calculates_total_time_correctly()
     {
         // Arrange
         using var scope = Factory.Services.CreateScope();
-        var controller = CreateController(scope, "-26");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+        var controller = CreateController(scope, "-25");
 
-        CleanupTourist(dbContext, -26);
-        CreateCompletedToursForTourist(dbContext, -26, 2);
-
-        // Dodaj abandonovanu turu
-        var abandonedTour = CreateTour(dbContext, "Abandoned Tour", 8.0);
-        var abandonedExecution = new TourExecution(-26, abandonedTour.Id, 45.27, 19.87);
-        abandonedExecution.Abandon();
-        dbContext.TourExecutions.Add(abandonedExecution);
-        dbContext.SaveChanges();
+        CleanupTourist(dbContext, -25);
+        CreateCompletedToursForTourist(dbContext, -25, 2);
 
         // Act
         var result = controller.GetTourHistory();
@@ -159,11 +151,12 @@ public class TourHistoryQueryTests : BaseToursIntegrationTest
         // Assert
         var data = ((OkObjectResult)result.Result).Value as TourHistoryOverviewDto;
 
-        // 2 kompletirane + 1 abandonovana = 3 ukupno
-        data.Statistics.CompletionRate.ShouldBeGreaterThan(60);
-        data.Statistics.CompletionRate.ShouldBeLessThan(70);
+        data.Statistics.ShouldNotBeNull();
+        data.Statistics.TotalTimeSpent.ShouldBeGreaterThan(0);
+        // Vreme se računa kao razlika između StartTime i CompletionTime
     }
 
+    // ==================== HELPER METHODS ====================
 
     private static TourHistoryController CreateController(IServiceScope scope, string touristId)
     {

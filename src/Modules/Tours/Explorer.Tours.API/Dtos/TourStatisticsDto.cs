@@ -11,7 +11,5 @@ namespace Explorer.Tours.API.Dtos
         public int TotalCompletedTours { get; set; }
         public double TotalDistanceTraveled { get; set; } // km
         public double TotalTimeSpent { get; set; } // minutes
-        public double CompletionRate { get; set; } // % (completed / purchased)
-
     }
 }

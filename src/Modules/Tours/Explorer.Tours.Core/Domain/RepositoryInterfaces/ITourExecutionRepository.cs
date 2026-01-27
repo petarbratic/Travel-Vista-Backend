@@ -18,5 +18,6 @@ public interface ITourExecutionRepository
     // metode za tour history
     List<TourExecution> GetCompletedByTouristId(long touristId);
     List<TourExecution> GetAllCompleted();
-    int GetTotalPurchasedToursCount(long touristId);
+    
+    List<long> GetAllTouristIds();
 }
