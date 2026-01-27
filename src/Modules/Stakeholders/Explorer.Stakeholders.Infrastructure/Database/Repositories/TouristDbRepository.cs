@@ -56,4 +56,9 @@ public class TouristDbRepository : ITouristRepository
         _dbContext.SaveChanges();
         return tourist;
     }
+
+    public List<Tourist> GetAll()
+    {
+        return _dbSet.ToList();
+    }
 }

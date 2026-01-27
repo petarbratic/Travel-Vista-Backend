@@ -20,7 +20,6 @@ using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.Core.UseCases.Execution;
 using Explorer.Tours.API.Public.Review;
 using Explorer.Tours.Core.UseCases.Review;
-using Explorer.Tours.API.Internal;
 
 using Explorer.Payments.API.Internal;
 
@@ -68,6 +67,11 @@ public static class ToursStartup
         services.AddScoped<ICouponService, CouponService>();
         services.AddScoped<ISaleService, SaleService>();
         services.AddScoped<ITourWishlistService, TourWishlistService>();
+        services.AddScoped<ITourHistoryService, TourHistoryService>();
+
+        services.AddScoped<IGroupTourSessionService, GroupTourSessionService>();
+        services.AddScoped<IGroupTourExecutionService, GroupTourExecutionService>();
+        services.AddScoped<IGroupTourSessionCleanup, GroupTourSessionCleanup>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)
@@ -90,6 +94,7 @@ public static class ToursStartup
         services.AddScoped<ICouponRepository, CouponDbRepository>();
         services.AddScoped<ISaleRepository, SaleDbRepository>();
         services.AddScoped<ITourWishlistRepository, TourWishlistDbRepository>();
+        services.AddScoped<IGroupTourSessionRepository, GroupTourSessionDbRepository>();
         var dataSourceBuilder = new NpgsqlDataSourceBuilder(DbConnectionStringBuilder.Build("tours"));
         dataSourceBuilder.EnableDynamicJson();
         var dataSource = dataSourceBuilder.Build();

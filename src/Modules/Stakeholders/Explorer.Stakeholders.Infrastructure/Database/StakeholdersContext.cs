@@ -18,18 +18,16 @@ public class StakeholdersContext : DbContext
     public DbSet<Club> Clubs { get; set; }
     public DbSet<ClubJoinRequest> ClubJoinRequests { get; set; }
     public DbSet<ClubImage> ClubImages { get; set; }
-
     public DbSet<Meetup> Meetups { get; set; }
-
     public DbSet<Preference> Preferences { get; set; }
-
     public DbSet<Tourist> Tourists { get; set; }
-
     public DbSet<Wallet> Wallets { get; set; }
-
     public DbSet<XpEvent> XpEvents { get; set; }
     public DbSet<Achievement> Achievements { get; set; }
     public DbSet<WelcomeBonus> WelcomeBonuses { get; set; }
+    public DbSet<TouristRankRewards> TouristRankRewards { get; set; }
+    public DbSet<WalletTransaction> WalletTransactions { get; set; }
+
 
     public StakeholdersContext(DbContextOptions<StakeholdersContext> options) : base(options) {}
 
@@ -201,6 +199,36 @@ public class StakeholdersContext : DbContext
             entity.Property(wb => wb.CreatedAt).IsRequired();
             entity.Property(wb => wb.ExpiresAt).IsRequired();
             entity.Property(wb => wb.UsedAt).IsRequired(false);
+        });
+
+        modelBuilder.Entity<TouristRankRewards>(entity =>
+        {
+            entity.HasKey(r => r.Id);
+            entity.HasIndex(r => r.TouristId).IsUnique();
+            entity.Property(r => r.GoldRewardClaimed).IsRequired();
+            entity.Property(r => r.PlatinumRewardClaimed).IsRequired();
+            entity.Property(r => r.DiamondRewardClaimed).IsRequired();
+            entity.Property(r => r.VistaRewardClaimed).IsRequired();
+        });
+
+        modelBuilder.Entity<WalletTransaction>(entity =>
+        {
+            entity.HasKey(t => t.Id);
+            entity.HasIndex(t => new { t.PersonId, t.CreatedAtUtc });
+
+            entity.Property(t => t.PersonId).IsRequired();
+            entity.Property(t => t.AmountAc).IsRequired();
+
+            entity.Property(t => t.Type)
+                .HasConversion<int>()
+                .IsRequired();
+
+            entity.Property(t => t.Description).IsRequired();
+            entity.Property(t => t.CreatedAtUtc).IsRequired();
+
+            entity.Property(t => t.ReferenceType).IsRequired(false);
+            entity.Property(t => t.ReferenceId).IsRequired(false);
+            entity.Property(t => t.InitiatorPersonId).IsRequired(false);
         });
 
 

@@ -1,14 +1,13 @@
-// src/Modules/Payments/Explorer.Payments.Core/UseCases/Shopping/TourPurchaseTokenService.cs
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Explorer.Payments.API.Dtos;
 using Explorer.Payments.API.Internal;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Payments.API.Public.Shopping;
 using Explorer.Payments.Core.Domain;
 using Explorer.Payments.Core.Domain.RepositoryInterfaces;
-using Explorer.Stakeholders.API.Internal;
 using Explorer.Tours.API.Internal;
 
 namespace Explorer.Payments.Core.UseCases.Shopping
@@ -26,6 +25,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
         private readonly IInternalXpEventService _internalXpEventService;
         private readonly IInternalWelcomeBonusService _welcomeBonusService;
         private readonly IInternalAchievementService _achievementService;
+        private readonly IInternalTouristRankService _touristRankService;
         private readonly IMapper _mapper;
 
         public TourPurchaseTokenService(
@@ -40,6 +40,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             IInternalXpEventService xpEventService,
             IInternalWelcomeBonusService welcomeBonusService,
             IInternalAchievementService achievementService,
+            IInternalTouristRankService touristRankService,
             IMapper mapper)
         {
             _cartRepository = cartRepository;
@@ -53,21 +54,17 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             _internalXpEventService = xpEventService;
             _welcomeBonusService = welcomeBonusService;
             _achievementService = achievementService;
+            _touristRankService = touristRankService;
             _mapper = mapper;
         }
 
         public CheckoutResultDto Checkout(long touristId)
         {
-            Console.WriteLine($"\n========== CHECKOUT START (Tourist {touristId}) ==========");
-
             try
             {
-                Console.WriteLine("[1/8] Getting cart...");
                 var cart = _cartRepository.GetActiveForTourist(touristId);
-
                 if (cart == null || (cart.Items.Count == 0 && cart.BundleItems.Count == 0))
                 {
-                    Console.WriteLine("[ERROR] Cart is null or empty");
                     return new CheckoutResultDto
                     {
                         Success = false,
@@ -77,34 +74,33 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                         BundlePurchaseRecords = new List<BundlePurchaseRecordDto>()
                     };
                 }
-                Console.WriteLine($"[SUCCESS] Cart has {cart.Items.Count} tour items and {cart.BundleItems.Count} bundle items, Total: {cart.TotalPrice} AC");
 
-                // Proveri da li postoji aktivni popust bonus
-                Console.WriteLine("[2/8] Checking for welcome bonus discount...");
+                // Check rank discount
+                var rankDiscountPercent = _touristRankService.GetRankDiscountPercentage(touristId);
+
+                // Check welcome bonus discount
                 var discountBonus = _welcomeBonusService.GetActiveDiscountBonus(touristId);
+                decimal welcomeBonusPercent = discountBonus?.Value ?? 0;
+
+                // Apply the higher discount
+                decimal appliedDiscountPercent = Math.Max(rankDiscountPercent, welcomeBonusPercent);
+                string discountSource = appliedDiscountPercent == rankDiscountPercent && appliedDiscountPercent > 0
+                    ? "Rank Discount"
+                    : appliedDiscountPercent > 0 ? "Welcome Bonus" : "None";
+
                 decimal finalPrice = cart.TotalPrice;
                 decimal discountAmount = 0;
-                
-                if (discountBonus != null)
+
+                if (appliedDiscountPercent > 0)
                 {
-                    discountAmount = cart.TotalPrice * (discountBonus.Value / 100m);
+                    discountAmount = cart.TotalPrice * (appliedDiscountPercent / 100m);
                     finalPrice = cart.TotalPrice - discountAmount;
-                    Console.WriteLine($"[SUCCESS] Welcome bonus discount applied: {discountBonus.Value}% (saved {discountAmount:F2} AC)");
-                }
-                else
-                {
-                    Console.WriteLine("[INFO] No active discount bonus found");
                 }
 
-                Console.WriteLine($"[INFO] Original price: {cart.TotalPrice} AC, Final price: {finalPrice:F2} AC");
-
-                Console.WriteLine("[3/8] Getting wallet...");
                 var wallet = _walletService.GetWallet(touristId);
-                Console.WriteLine($"[SUCCESS] Wallet balance: {wallet.BalanceAc} AC");
 
                 if (wallet.BalanceAc < finalPrice)
                 {
-                    Console.WriteLine($"[ERROR] Insufficient funds");
                     return new CheckoutResultDto
                     {
                         Success = false,
@@ -115,32 +111,31 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                     };
                 }
 
-                Console.WriteLine("[4/8] Deducting AC...");
-                _walletService.DeductAc(touristId, finalPrice);
-                Console.WriteLine($"[SUCCESS] Deducted {finalPrice:F2} AC");
+                //_walletService.DeductAc(touristId, finalPrice);
+                _walletService.Debit(
+                    touristId,
+                    (int)finalPrice,
+                    WalletTxTypes.CheckoutPurchase,
+                    $"Checkout purchase (-{(int)finalPrice} AC)",
+                    "Checkout",
+                    cart.Id
+                );
 
-                // Označi bonus kao iskorišćen ako je primenjen popust
-                if (discountBonus != null)
+                // Mark welcome bonus as used ONLY if it was the applied discount
+                if (appliedDiscountPercent > 0 && appliedDiscountPercent == welcomeBonusPercent && discountBonus != null)
                 {
-                    Console.WriteLine("[4.5/8] Marking welcome bonus as used...");
                     _welcomeBonusService.MarkBonusAsUsed(touristId);
-                    Console.WriteLine("[SUCCESS] Welcome bonus marked as used");
                 }
 
-                Console.WriteLine("[5/8] Creating tokens and records...");
                 var tokenDtos = new List<TourPurchaseTokenDto>();
                 var recordDtos = new List<TourPurchaseRecordDto>();
-                var bundleRecordDtos = new List<BundlePurchaseRecordDto>(); // ✅ NOVA LISTA
+                var bundleRecordDtos = new List<BundlePurchaseRecordDto>();
 
                 // Process individual tours
                 foreach (var item in cart.Items)
                 {
-                    Console.WriteLine($"  Processing tour {item.TourId}...");
-
-                    Console.WriteLine("    Creating token...");
                     var token = new TourPurchaseToken(touristId, item.TourId);
                     var createdToken = _tokenRepository.Create(token);
-                    Console.WriteLine($"    Token created: ID={createdToken.Id}");
 
                     tokenDtos.Add(new TourPurchaseTokenDto
                     {
@@ -151,7 +146,6 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                         CreatedAt = createdToken.CreatedAt
                     });
 
-                    Console.WriteLine("    Creating record...");
                     var record = new TourPurchaseRecord(touristId, item.TourId, item.Price);
                     var createdRecord = _recordRepository.Create(record);
 
@@ -173,42 +167,30 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                         PurchasedAt = createdRecord.PurchasedAt
                     });
 
-                    Console.WriteLine("    Sending notification...");
                     try
                     {
                         var tour = _tourService.GetById(item.TourId);
                         if (tour != null)
                         {
                             _notificationService.CreateTourPurchaseNotification(touristId, item.TourId, tour.Name);
-                            Console.WriteLine("    Notification sent");
                         }
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        Console.WriteLine($"    Notification failed (non-critical): {ex.Message}");
+                        // Notification failed (non-critical)
                     }
                 }
 
-                // ✅ Process bundle items
-                Console.WriteLine("[4B/8] Processing bundle items...");
+                // Process bundle items
                 foreach (var bundleItem in cart.BundleItems)
                 {
-                    Console.WriteLine($"  Processing bundle {bundleItem.BundleId}...");
-
                     var bundle = _bundleService.GetById(bundleItem.BundleId);
                     if (bundle == null)
-                    {
-                        Console.WriteLine($"    [WARNING] Bundle {bundleItem.BundleId} not found, skipping");
                         continue;
-                    }
 
-                    // ✅ Create bundle purchase record
-                    Console.WriteLine("    Creating bundle record...");
                     var bundleRecord = new BundlePurchaseRecord(touristId, bundleItem.BundleId, bundleItem.Price);
                     var createdBundleRecord = _bundlePurchaseRecordRepository.Create(bundleRecord);
-                    Console.WriteLine($"    Bundle record created: ID={createdBundleRecord.Id}");
 
-                    // ✅ Add to bundleRecordDtos list
                     bundleRecordDtos.Add(new BundlePurchaseRecordDto
                     {
                         Id = createdBundleRecord.Id,
@@ -218,11 +200,8 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                         PurchasedAt = createdBundleRecord.PurchasedAt
                     });
 
-                    // ✅ Create tokens for all tours in the bundle
-                    Console.WriteLine($"    Creating tokens for {bundle.TourIds.Count} tours in bundle...");
                     foreach (var tourId in bundle.TourIds)
                     {
-                        Console.WriteLine($"      Creating token for tour {tourId}...");
                         var token = new TourPurchaseToken(touristId, tourId);
                         var createdToken = _tokenRepository.Create(token);
 
@@ -234,54 +213,35 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                             Token = createdToken.Token,
                             CreatedAt = createdToken.CreatedAt
                         });
-                        Console.WriteLine($"      Token created: ID={createdToken.Id}");
                     }
 
-                    // ✅ Send bundle notification
-                    Console.WriteLine("    Sending bundle notification...");
                     try
                     {
                         _notificationService.CreateBundlePurchaseNotification(touristId, bundleItem.BundleId, bundleItem.BundleName);
-                        Console.WriteLine("    Bundle notification sent");
                     }
-                    catch (Exception ex)
+                    catch
                     {
-                        Console.WriteLine($"    Bundle notification failed (non-critical): {ex.Message}");
+                        // Notification failed (non-critical)
                     }
                 }
 
-                Console.WriteLine($"[5/8] Created {tokenDtos.Count} tokens, {recordDtos.Count} tour records, and {bundleRecordDtos.Count} bundle records");
-
-                Console.WriteLine("[6/8] Clearing cart...");
                 cart.Clear();
-                Console.WriteLine($"[SUCCESS] Cart cleared, Items: {cart.Items.Count}, BundleItems: {cart.BundleItems.Count}");
-
-                Console.WriteLine("[7/8] Updating cart in database...");
                 _cartRepository.Update(cart);
-                Console.WriteLine("[SUCCESS] Cart updated in database");
 
-                Console.WriteLine("[8/8] Creating result DTO...");
-                var totalItems = recordDtos.Count + bundleRecordDtos.Count;
                 var result = new CheckoutResultDto
                 {
                     Success = true,
-                    Message = $"Successfully purchased {recordDtos.Count} tour(s) and {bundleRecordDtos.Count} bundle(s)!",
+                    Message = $"Successfully purchased {recordDtos.Count} tour(s) and {bundleRecordDtos.Count} bundle(s)!" +
+                              (appliedDiscountPercent > 0 ? $" ({appliedDiscountPercent}% {discountSource} applied)" : ""),
                     Tokens = tokenDtos,
                     PurchaseRecords = recordDtos,
-                    BundlePurchaseRecords = bundleRecordDtos // ✅ DODAJ bundle records
+                    BundlePurchaseRecords = bundleRecordDtos
                 };
-                Console.WriteLine($"[SUCCESS] Result created with {result.Tokens.Count} tokens, {result.PurchaseRecords.Count} tour records, {result.BundlePurchaseRecords.Count} bundle records");
 
-                Console.WriteLine("========== CHECKOUT COMPLETED SUCCESSFULLY ==========\n");
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                Console.WriteLine($"\n========== CHECKOUT FAILED ==========");
-                Console.WriteLine($"Exception Type: {ex.GetType().Name}");
-                Console.WriteLine($"Message: {ex.Message}");
-                Console.WriteLine($"Stack Trace:\n{ex.StackTrace}");
-                Console.WriteLine("=====================================\n");
                 throw;
             }
         }

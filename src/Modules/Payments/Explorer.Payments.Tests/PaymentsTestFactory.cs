@@ -1,11 +1,14 @@
 ﻿
+using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Tests;
 using Explorer.Payments.Infrastructure.Database;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
 using Explorer.Tours.Infrastructure.Database;
+using Explorer.Encounters.Infrastructure.Database;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
@@ -26,6 +29,18 @@ namespace Explorer.Payments.Tests
             var toursDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<ToursContext>));
             services.Remove(toursDescriptor!);
             services.AddDbContext<ToursContext>(SetupTestContext());
+
+            var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
+            services.Remove(stakeholdersDescriptor!);
+            services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
+            var blogsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<BlogContext>));
+            services.Remove(blogsDescriptor!);
+            services.AddDbContext<BlogContext>(SetupTestContext());
+
+            var encountersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<EncountersContext>));
+            services.Remove(encountersDescriptor!);
+            services.AddDbContext<EncountersContext>(SetupTestContext());
 
             // ==================== MOCK: IInternalTourService ====================
             var existingInternalTour = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalTourService));

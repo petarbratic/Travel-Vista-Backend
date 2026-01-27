@@ -11,4 +11,5 @@ public class TourExecutionCreateDto
     public long TourId { get; set; }
     public double StartLatitude { get; set; }
     public double StartLongitude { get; set; }
+    public long? GroupSessionId { get; set; } = null;
 }

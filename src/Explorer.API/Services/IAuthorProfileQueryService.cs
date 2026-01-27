@@ -9,5 +9,7 @@ namespace Explorer.API.Services
     public interface IAuthorProfileQueryService
     {
         AuthorProfileStatsDto GetMyStats(long currentUserId);
+        AuthorProfileStatsDto GetAuthorStats(long authorId);
+        List<AuthorTopListItemDto> GetTopAuthors(string sort, int take);
     }
 }
