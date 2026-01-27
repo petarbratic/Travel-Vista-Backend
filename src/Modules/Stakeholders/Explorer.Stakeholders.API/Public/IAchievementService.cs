@@ -11,5 +11,6 @@ namespace Explorer.Stakeholders.API.Public
     {
         AchievementDto Create(AchievementDto achievement, long touristId);
         string BlogCreated(long touristId);
+        List<AchievementDto> GetForTourist(long touristId);
     }
 }

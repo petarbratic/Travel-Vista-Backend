@@ -89,14 +89,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
                 AchievementCode.TenReviewsWritten =>
                     ("Ten Reviews Written", "You have written 10 reviews."),
-                AchievementCode.FirstTourReviewWritten =>
-                    ("First Tour Review Written", "You have written your first tour review."),
-
-                AchievementCode.FiveTourReviewsWritten =>
-                    ("Five Tour Reviews Written", "You have written 5 tour reviews."),
-
-                AchievementCode.TenTourReviewsWritten =>
-                    ("Ten Tour Reviews Written", "You have written 10 tour reviews."),
+               
 
                 AchievementCode.FirstTourBought =>
                     ("First Tour Purchased", "You have purchased your first tour."),
@@ -110,6 +103,17 @@ namespace Explorer.Stakeholders.Core.UseCases
                 _ =>
                     ("Achievement Unlocked", "You have unlocked a new achievement.")
             };
+        }
+        public List<AchievementDto> GetForTourist(long touristId)
+        {
+            if (touristId == 0)
+                throw new ArgumentException("Invalid tourist id.");
+
+            var achievements = _achievementRepository.GetByTouristId(touristId);
+
+            return achievements
+                .Select(a => _mapper.Map<AchievementDto>(a))
+                .ToList();
         }
     }
 }
