@@ -21,21 +21,24 @@ public class TouristMeetupController : ControllerBase
     [HttpGet]
     public ActionResult<List<MeetupDto>> GetAll()
     {
-        var result = _meetupService.GetAll();
+        var requesterId = User.PersonId();
+        var result = _meetupService.GetAll(requesterId);
         return Ok(result);
     }
 
     [HttpGet("{id:long}")]
     public ActionResult<MeetupDto> GetById(long id)
     {
-        var result = _meetupService.GetById(id);
+        var requesterId = User.PersonId();
+        var result = _meetupService.GetById(id, requesterId);
         return Ok(result);
     }
 
     [HttpGet("by-tour/{tourId}")]
     public ActionResult<List<MeetupDto>> GetByTourId(long tourId)
     {
-        var result = _meetupService.GetByTourId(tourId);
+        var requesterId = User.PersonId();
+        var result = _meetupService.GetByTourId(tourId, requesterId);
         return Ok(result);
     }
 
@@ -61,5 +64,13 @@ public class TouristMeetupController : ControllerBase
         var creatorId = User.PersonId();
         _meetupService.Delete(id, creatorId);
         return Ok();
+    }
+
+    [HttpGet("map-locations")]
+    public ActionResult<List<MeetupMapPreviewDto>> GetMapLocations()
+    {
+        var requesterId = User.PersonId();
+        var result = _meetupService.GetMapLocations(requesterId);
+        return Ok(result);
     }
 }

@@ -32,6 +32,8 @@ public class ToursContext : DbContext
 
     public DbSet<Sale> Sales { get; set; }
 
+    public DbSet<TourWishlist> TourWishlists { get; set; }
+
     public DbSet<GroupTourSession> GroupTourSessions { get; set; }
     public DbSet<GroupTourSessionParticipant> GroupTourSessionParticipants { get; set; }
 
@@ -324,6 +326,21 @@ public class ToursContext : DbContext
                 ));
 
             entity.HasIndex(s => s.AuthorId);
+        });
+
+        // TourWishlist configuration
+        modelBuilder.Entity<TourWishlist>(entity =>
+        {
+            entity.ToTable("TourWishlists", "tours");
+            entity.HasKey(w => w.Id);
+            entity.Property(w => w.Id).ValueGeneratedOnAdd();
+            entity.Property(w => w.TouristId).IsRequired();
+            entity.Property(w => w.TourId).IsRequired();
+            entity.Property(w => w.CreatedAt).IsRequired();
+
+            // Unique constraint: one tourist can have a tour in wishlist only once
+            entity.HasIndex(w => new { w.TouristId, w.TourId }).IsUnique();
+            entity.HasIndex(w => w.TouristId);
         });
         
         modelBuilder.Entity<GroupTourSession>()

@@ -38,8 +38,25 @@ public class StakeholderProfile : Profile
         CreateMap<PreferenceDto, Preference>().ReverseMap(); //preference
         CreateMap<PreferenceCreateDto, Preference>();
         CreateMap<PreferenceUpdateDto, Preference>();
+        CreateMap<Meetup, MeetupMapPreviewDto>()
+            .ForMember(dest => dest.StartTime, opt => opt.MapFrom(src => src.DateTime));
 
         //luka s
         CreateMap<ClubJoinRequestDto, ClubJoinRequest>().ReverseMap();
+
+        CreateMap<Achievement, AchievementDto>()
+            .ForMember(d => d.Code, opt => opt.MapFrom(s => s.Code.ToString()))
+            .ForMember(d => d.Name, opt => opt.Ignore())
+            .ForMember(d => d.Description, opt => opt.Ignore());
+        CreateMap<XpEvent, XpEventDto>()
+            .ForMember(d => d.Type, opt => opt.MapFrom(s => s.Type.ToString()))
+            .ForMember(d => d.Description, opt => opt.Ignore());
+
+        //Tourist Level
+        CreateMap<Tourist, TouristStatsDto>()
+            .ForMember(dest => dest.TouristId, opt => opt.MapFrom(src => src.Id))
+            .ForMember(dest => dest.XP, opt => opt.MapFrom(src => src.XP))
+            .ForMember(dest => dest.Level, opt => opt.MapFrom(src => src.Level))
+            .ForMember(dest => dest.Rank, opt => opt.MapFrom(src => src.Rank.ToString()));
     }
 }

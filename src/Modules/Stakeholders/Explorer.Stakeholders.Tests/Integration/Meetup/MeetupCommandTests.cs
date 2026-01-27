@@ -115,7 +115,7 @@ public class MeetupCommandTests : BaseStakeholdersIntegrationTest
         {
             Title = "Updated Photography & Travel",
             Description = "Updated description for the event",
-            DateTime = new DateTime(2026, 1, 15, 18, 0, 0, DateTimeKind.Utc),
+            DateTime = new DateTime(2027, 1, 21, 18, 0, 0, DateTimeKind.Utc),
             Address = "New Updated Address",
             Latitude = 45.3m,
             Longitude = 19.9m

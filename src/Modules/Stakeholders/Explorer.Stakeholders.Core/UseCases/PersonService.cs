@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
@@ -9,13 +10,22 @@ namespace Explorer.Stakeholders.Core.UseCases;
 public class PersonService : IPersonService
 {
     private readonly IPersonRepository _personRepository;
-    private readonly IUserRepository _userRepository;   // DODATO
+    private readonly IUserRepository _userRepository;
+    private readonly ITouristRepository _touristRepository; 
+    private readonly IFirstTimeXpService _firstTimeXpService; 
     private readonly IMapper _mapper;
 
-    public PersonService(IPersonRepository personRepository, IUserRepository userRepository, IMapper mapper)
+    public PersonService(
+        IPersonRepository personRepository,
+        IUserRepository userRepository,
+        ITouristRepository touristRepository, 
+        IFirstTimeXpService firstTimeXpService,
+        IMapper mapper)
     {
         _personRepository = personRepository;
         _userRepository = userRepository;
+        _touristRepository = touristRepository;
+        _firstTimeXpService = firstTimeXpService;
         _mapper = mapper;
     }
 
@@ -27,7 +37,6 @@ public class PersonService : IPersonService
 
         var dto = _mapper.Map<PersonDto>(person);
 
-        // mapiramo IsActive iz User entiteta
         var user = _userRepository.Get(person.UserId);
         dto.IsActive = user?.IsActive ?? false;
 
@@ -41,6 +50,10 @@ public class PersonService : IPersonService
         if (person == null)
             throw new KeyNotFoundException($"Person with ID {personId} not found.");
 
+        // Proveri da li je ovo prvi put da postavlja profilnu sliku
+        var wasProfilePictureEmpty = string.IsNullOrWhiteSpace(person.ProfilePictureUrl);
+        var isNowSettingProfilePicture = !string.IsNullOrWhiteSpace(personDto.ProfilePictureUrl);
+
         person.Update(
             personDto.Name,
             personDto.Surname,
@@ -51,14 +64,22 @@ public class PersonService : IPersonService
         );
 
         var updatedPerson = _personRepository.Update(person);
+
+        // Ako je prvi put postavio sliku, dodeli XP
+        if (wasProfilePictureEmpty && isNowSettingProfilePicture)
+        {
+            var tourist = _touristRepository.Get(personId);
+            if (tourist != null)
+            {
+                _firstTimeXpService.TryAwardFirstProfilePicture(tourist.Id, person.Id);
+            }
+        }
+
         return _mapper.Map<PersonDto>(updatedPerson);
     }
 
     public PersonDto Create(AccountRegistrationDto dto)
     {
-        // --- VALIDACIJE (ostavljamo ih iste) ---
-
-
         if (_personRepository.EmailExists(dto.Email))
             throw new EntityValidationException("Email already exists.");
 
@@ -68,53 +89,29 @@ public class PersonService : IPersonService
         if (!dto.Email.EndsWith("@gmail.com"))
             throw new EntityValidationException("Email must be a valid @gmail.com address.");
 
-        // Administrator ili Autor se kreiraju ručno u admin panelu,
-        // pa po defaultu dodeljujemo ispravnu User rolu:
         var role = Enum.Parse<UserRole>(dto.Role, true);
-
-        // ili UserRole.Author — zavisi od toga šta želiš da kreiraš
-
-        // --- KREIRANJE USERA ---
 
         if (_userRepository.Exists(dto.Username))
             throw new EntityValidationException("Username already exists in users.");
 
-        var user = new User(
-            dto.Username,
-            dto.Password,
-            role,
-            true // active
-        );
-
+        var user = new User(dto.Username, dto.Password, role, true);
         user = _userRepository.Create(user);
 
-        // --- KREIRANJE PERSON-A ---
-
-        var person = new Person(
-            user.Id,
-            dto.Name,
-            dto.Surname,
-            dto.Email
-           
-        );
-
+        var person = new Person(user.Id, dto.Name, dto.Surname, dto.Email);
         person = _personRepository.Create(person);
 
         return _mapper.Map<PersonDto>(person);
     }
 
-
     public List<PersonDto> GetAll(long currentPersonId)
     {
-        var people = _personRepository.GetAll(); // svi personi
-        var filtered = people.Where(p => p.UserId != currentPersonId); // SVI OSIM JA :)
-
+        var people = _personRepository.GetAll();
+        var filtered = people.Where(p => p.UserId != currentPersonId);
         var dtos = new List<PersonDto>();
 
         foreach (var person in filtered)
         {
             var user = _userRepository.Get(person.UserId);
-
             var dto = _mapper.Map<PersonDto>(person);
 
             if (user != null)
@@ -135,8 +132,6 @@ public class PersonService : IPersonService
 
         return dtos;
     }
-
-
 
     public void Block(long id)
     {

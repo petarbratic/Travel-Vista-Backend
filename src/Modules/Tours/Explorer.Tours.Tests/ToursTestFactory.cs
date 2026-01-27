@@ -1,10 +1,13 @@
 ﻿
+using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Tests;
+using Explorer.Encounters.Infrastructure.Database;
 using Explorer.Payments.API.Internal;
 using Explorer.Payments.Infrastructure;
 using Explorer.Payments.Infrastructure.Database;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
 using Explorer.Tours.Infrastructure.Database;
@@ -29,12 +32,21 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
             services.Remove(descriptor);
         services.AddDbContext<ToursContext>(SetupTestContext());
 
-        // Payments DB Context
-        var paymentsDescriptor = services.SingleOrDefault(d =>
-            d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
-        if (paymentsDescriptor != null)
-            services.Remove(paymentsDescriptor);
+        var paymentsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
+        services.Remove(paymentsDescriptor!);
         services.AddDbContext<PaymentsContext>(SetupTestContext());
+
+        var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
+        services.Remove(stakeholdersDescriptor!);
+        services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
+        var blogsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<BlogContext>));
+        services.Remove(blogsDescriptor!);
+        services.AddDbContext<BlogContext>(SetupTestContext());
+
+        var encountersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<EncountersContext>));
+        services.Remove(encountersDescriptor!);
+        services.AddDbContext<EncountersContext>(SetupTestContext());
 
         // ==================== MOCK: IInternalShoppingCartService ====================
         var existingShoppingCart = services.FirstOrDefault(d =>
@@ -130,6 +142,15 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
             });
 
         services.AddScoped<IInternalTourService>(_ => tourMock.Object);
+
+        // ==================== MOCK: IInternalXpEventService ====================
+        var existingXp = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalXpEventService));
+        if (existingXp != null) services.Remove(existingXp);
+
+        var xpMock = new Mock<IInternalXpEventService>();
+        xpMock.Setup(x => x.CreateTourReviewXp(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<int>()));
+
+        services.AddScoped<IInternalXpEventService>(_ => xpMock.Object);
 
         return services;
     }

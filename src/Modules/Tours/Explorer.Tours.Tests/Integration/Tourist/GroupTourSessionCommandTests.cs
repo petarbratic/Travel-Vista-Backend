@@ -1,5 +1,6 @@
 ﻿using Explorer.API.Controllers.Tourist;
 using Explorer.API.Controllers.Tourist.Execution;
+using Explorer.Payments.API.Public.Shopping;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Execution;
 using Explorer.Tours.API.Public.Tourist;
@@ -30,16 +31,23 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             using var scope = Factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
 
-            var controller = CreateSessionController(scope, "-21");
+            var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
 
-            var teController = CreateTourExecutionController(scope, "-21");
+            var controller = CreateSessionController(scope, "-23");
+
+            var teController = CreateTourExecutionController(scope, "-23");
 
             teController.AbandonTour();
+
+            shoppingCart.AddToCart(-23, -2);
+            tokenService.Checkout(-23);
 
             var createSessionDto = new CreateGroupTourSessionDto
             {
                 ClubId = -2,
                 TourId = -2,
+                TourName = "Test Tour Published",
             };
 
             var createResult = controller.CreateGroupTourSession(createSessionDto);
@@ -56,7 +64,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 .FirstOrDefault();
 
             participantInDb.ShouldNotBeNull();
-            participantInDb!.TouristId.ShouldBe(-21);
+            participantInDb!.TouristId.ShouldBe(-23);
 
             var tourExecutionInDb = dbContext.TourExecutions
                 .Where(te => te.Id == participantInDb.TourExecutionId && te.GroupSessionId == sessionInDb.Id)
@@ -67,7 +75,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             var createdSession = (createResult.Result as CreatedAtActionResult)!.Value as GroupTourSessionDto;
             createdSession.ShouldNotBeNull();
             createdSession.ClubId.ShouldBe(-2);
-            createdSession.Participants[0].TouristId.ShouldBe(-21);
+            createdSession.Participants[0].TouristId.ShouldBe(-23);
         }
 
         [Fact]
@@ -75,17 +83,23 @@ namespace Explorer.Tours.Tests.Integration.Tourist
         {
             using var scope = Factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
+            var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
 
-            var controller = CreateSessionController(scope, "-21");
+            var controller = CreateSessionController(scope, "-23");
 
-            var teController = CreateTourExecutionController(scope, "-21");
+            var teController = CreateTourExecutionController(scope, "-23");
 
             teController.AbandonTour();
+
+            shoppingCart.AddToCart(-23, -2);
+            tokenService.Checkout(-23);
 
             var createSessionDto = new CreateGroupTourSessionDto
             {
                 ClubId = -2,
                 TourId = -2,
+                TourName = "Test Tour Published",
             };
 
             var createResult = controller.CreateGroupTourSession(createSessionDto);
@@ -102,7 +116,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
                 .FirstOrDefault();
 
             participantInDb.ShouldNotBeNull();
-            participantInDb!.TouristId.ShouldBe(-21);
+            participantInDb!.TouristId.ShouldBe(-23);
 
             var tourExecutionInDb = dbContext.TourExecutions
                 .Where(te => te.Id == participantInDb.TourExecutionId && te.GroupSessionId == sessionInDb.Id)
@@ -117,14 +131,23 @@ namespace Explorer.Tours.Tests.Integration.Tourist
         {
             using var scope = Factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-            var controller = CreateSessionController(scope, "-21");
-            var teController = CreateTourExecutionController(scope, "-21");
+            var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
+
+            var controller = CreateSessionController(scope, "-23");
+
+            var teController = CreateTourExecutionController(scope, "-23");
+
             teController.AbandonTour();
+
+            shoppingCart.AddToCart(-23, -2);
+            tokenService.Checkout(-23);
 
             var createSessionDto = new CreateGroupTourSessionDto
             {
                 ClubId = -2,
                 TourId = -2,
+                TourName = "Test Tour Published",
             };
 
             var createResult = controller.CreateGroupTourSession(createSessionDto);
@@ -136,7 +159,7 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             leftSession.ShouldNotBeNull();
 
             var participantInDb = dbContext.GroupTourSessionParticipants
-                .Where(p => p.SessionId == createdSession.Id && p.TouristId == -21)
+                .Where(p => p.SessionId == createdSession.Id && p.TouristId == -23)
                 .FirstOrDefault();            
             participantInDb!.LeftAt.ShouldNotBeNull();
 
@@ -153,14 +176,23 @@ namespace Explorer.Tours.Tests.Integration.Tourist
         {
             using var scope = Factory.Services.CreateScope();
             var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
-            var controller = CreateSessionController(scope, "-21");
-            var teController = CreateTourExecutionController(scope, "-21");
+            var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>();
+            var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
+
+            var controller = CreateSessionController(scope, "-23");
+
+            var teController = CreateTourExecutionController(scope, "-23");
+
             teController.AbandonTour();
+
+            shoppingCart.AddToCart(-23, -2);
+            tokenService.Checkout(-23);
 
             var createSessionDto = new CreateGroupTourSessionDto
             {
                 ClubId = -2,
                 TourId = -2,
+                TourName = "Test Tour Published",
             };
 
             var createResult = controller.CreateGroupTourSession(createSessionDto);
@@ -169,6 +201,8 @@ namespace Explorer.Tours.Tests.Integration.Tourist
             controller = CreateSessionController(scope, "-22");
             teController = CreateTourExecutionController(scope, "-22");
             teController.AbandonTour();
+            shoppingCart.AddToCart(-22, -2);
+            tokenService.Checkout(-22);
 
             var participant = new GroupTourSessionParticipantDto
             {

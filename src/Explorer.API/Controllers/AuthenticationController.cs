@@ -26,4 +26,11 @@ public class AuthenticationController : ControllerBase
     {
         return Ok(_authenticationService.Login(credentials));
     }
+
+    [HttpPost("google-login")]
+    public async Task<ActionResult<AuthenticationTokensDto>> GoogleLogin([FromBody] GoogleLoginDto googleLogin)
+    {
+        var result = await _authenticationService.GoogleLoginAsync(googleLogin);
+        return Ok(result);
+    }
 }
