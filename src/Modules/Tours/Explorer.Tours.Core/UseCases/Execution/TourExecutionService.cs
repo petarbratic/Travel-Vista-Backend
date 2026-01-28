@@ -11,6 +11,7 @@ using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Payments.API.Internal;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public.Authoring;
 using Explorer.Tours.API.Public.Tourist;
 
@@ -30,6 +31,8 @@ public class TourExecutionService : ITourExecutionService
     private readonly IInternalShoppingCartService _shoppingCartService;
 
     private readonly IInternalXpEventService _xpEventService;
+    private readonly IInternalNotificationService _notificationService;
+    private readonly IInternalAchievementService _achievementService;
 
     private readonly IGroupTourSessionCleanup _groupTourSessionCleanup;
     private readonly ITourService _tourService;
@@ -51,8 +54,13 @@ public class TourExecutionService : ITourExecutionService
 
         IInternalXpEventService xpEventService,
 
+
+        IInternalNotificationService notificationService,
+        IInternalAchievementService achievementService,
+
         IGroupTourSessionCleanup groupTourSessionCleanup,
         ITourService tourService,
+
 
         IMapper mapper)
     {
@@ -66,6 +74,9 @@ public class TourExecutionService : ITourExecutionService
         
         //_shoppingCartService = shoppingCartService;
         _shoppingCartService = shoppingCartService;
+
+        _notificationService = notificationService;
+        _achievementService = achievementService;
 
         _xpEventService = xpEventService;
 
@@ -259,7 +270,12 @@ public class TourExecutionService : ITourExecutionService
         activeExecution.Complete();
         var updated = _executionRepository.Update(activeExecution);
 
-        _xpEventService.CreateTourCompletedXp(touristId, updated.Id, 50);
+        _xpEventService.CreateTourCompletedXp(touristId, tour.Id, 50);
+
+        string message = _achievementService.CompletedTours(touristId);
+
+        if(!String.Equals(message, ""))
+            _notificationService.CreateAchievementNotification(touristId, message);
 
         return _mapper.Map<TourExecutionDto>(updated);
     }

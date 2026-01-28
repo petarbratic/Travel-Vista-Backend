@@ -2,6 +2,10 @@
 using Explorer.BuildingBlocks.Tests;
 using Explorer.Encounters.Infrastructure.Database;
 using Explorer.Payments.Infrastructure.Database;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Stakeholders.Core.UseCases;
+using Explorer.Tours.API.Public;
+using Explorer.Tours.Core.UseCases;
 using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.Infrastructure.Database;
 using Microsoft.AspNetCore.Authentication;
@@ -39,6 +43,10 @@ public class BlogTestFactory : BaseTestFactory<BlogContext>
 
         services.AddAuthentication("TestAuth")
            .AddScheme<AuthenticationSchemeOptions, TestAuthHandler>("TestAuth", _ => { });
+
+        services.AddScoped<IAchievementService, AchievementService>();
+        services.AddScoped<INotificationService, NotificationService>();
+
 
         return services;
     }

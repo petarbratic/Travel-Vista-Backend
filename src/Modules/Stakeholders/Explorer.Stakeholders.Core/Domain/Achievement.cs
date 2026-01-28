@@ -13,8 +13,6 @@ namespace Explorer.Stakeholders.Core.Domain
         FiveToursCompleted,
         TenToursCompleted,
         FirstClubJoined,
-        FiveClubsJoined,
-        TenClubsJoined,
         FirstReviewWritten,
         FiveReviewsWritten,
         TenReviewsWritten,
@@ -23,9 +21,7 @@ namespace Explorer.Stakeholders.Core.Domain
         FirstProfilePictureSet,
         FirstAppReview,
         FirstBlogCreated,
-        FirstTourReviewWritten,
-        FiveTourReviewsWritten,
-        TenTourReviewsWritten,
+       
         FirstTourBought,
         FiveTourBought,
         TenTourBought
