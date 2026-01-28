@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Stakeholders.Core.UseCases;
 
@@ -12,7 +14,9 @@ public class PersonService : IPersonService
     private readonly IPersonRepository _personRepository;
     private readonly IUserRepository _userRepository;
     private readonly ITouristRepository _touristRepository; 
-    private readonly IFirstTimeXpService _firstTimeXpService; 
+    private readonly IFirstTimeXpService _firstTimeXpService;
+    private readonly IInternalAchievementService _achievementService;
+    private readonly IInternalNotificationService _notificationService;
     private readonly IMapper _mapper;
 
     public PersonService(
@@ -20,12 +24,16 @@ public class PersonService : IPersonService
         IUserRepository userRepository,
         ITouristRepository touristRepository, 
         IFirstTimeXpService firstTimeXpService,
+        IInternalAchievementService achievementService,
+        IInternalNotificationService notificationService,
         IMapper mapper)
     {
         _personRepository = personRepository;
         _userRepository = userRepository;
         _touristRepository = touristRepository;
         _firstTimeXpService = firstTimeXpService;
+        _achievementService = achievementService;
+        _notificationService = notificationService;
         _mapper = mapper;
     }
 
@@ -72,6 +80,12 @@ public class PersonService : IPersonService
             if (tourist != null)
             {
                 _firstTimeXpService.TryAwardFirstProfilePicture(tourist.Id, person.Id);
+
+                string message = _achievementService.ProfilePictureChanged(tourist.Id);
+
+                if(!String.Equals(message, ""))
+                    _notificationService.CreateAchievementNotification(tourist.Id, message);
+
             }
         }
 

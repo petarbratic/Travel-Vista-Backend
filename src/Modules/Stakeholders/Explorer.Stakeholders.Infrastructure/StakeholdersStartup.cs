@@ -50,6 +50,8 @@ public static class StakeholdersStartup
         services.AddScoped<ITouristXPService, TouristXPService>();
         services.AddScoped<IXpEventService, XpEventService>();
         services.AddScoped<IInternalXpEventService, InternalXpEventService>();
+        services.AddScoped<IInternalAchievementService, InternalAchievementService>();
+        services.AddScoped<IAchievementService, AchievementService>();
         services.AddScoped<IWelcomeBonusService, WelcomeBonusService>();
         services.AddScoped<IInternalWelcomeBonusService, WelcomeBonusService>();
         services.AddScoped<IRankRewardService, RankRewardService>();

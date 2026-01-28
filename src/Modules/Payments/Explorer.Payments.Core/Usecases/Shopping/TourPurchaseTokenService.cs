@@ -24,6 +24,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
         private readonly IInternalBundleService _bundleService;
         private readonly IInternalXpEventService _internalXpEventService;
         private readonly IInternalWelcomeBonusService _welcomeBonusService;
+        private readonly IInternalAchievementService _achievementService;
         private readonly IInternalTouristRankService _touristRankService;
         private readonly IMapper _mapper;
 
@@ -38,6 +39,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             IInternalBundleService bundleService,
             IInternalXpEventService xpEventService,
             IInternalWelcomeBonusService welcomeBonusService,
+            IInternalAchievementService achievementService,
             IInternalTouristRankService touristRankService,
             IMapper mapper)
         {
@@ -51,6 +53,7 @@ namespace Explorer.Payments.Core.UseCases.Shopping
             _bundleService = bundleService;
             _internalXpEventService = xpEventService;
             _welcomeBonusService = welcomeBonusService;
+            _achievementService = achievementService;
             _touristRankService = touristRankService;
             _mapper = mapper;
         }
@@ -147,6 +150,13 @@ namespace Explorer.Payments.Core.UseCases.Shopping
                     var createdRecord = _recordRepository.Create(record);
 
                     _internalXpEventService.BuyTourXp(touristId, item.TourId, 20);
+
+                    string message = _achievementService.BoughtTours(touristId);
+
+                    if (!String.Equals(message, ""))
+                        _notificationService.CreateAchievementNotification(touristId, message);
+
+                    Console.WriteLine($"    Record created: ID={createdRecord.Id}");
 
                     recordDtos.Add(new TourPurchaseRecordDto
                     {

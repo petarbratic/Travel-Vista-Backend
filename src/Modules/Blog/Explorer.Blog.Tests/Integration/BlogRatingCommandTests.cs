@@ -1,6 +1,10 @@
 ﻿using Explorer.API.Controllers.Author_Tourist;
 using Explorer.Blog.API.Dtos;
 using Explorer.Blog.API.Public;
+using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.API.Public;
+using Explorer.Tours.API.Internal;
+using Explorer.Tours.API.Public;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +44,9 @@ namespace Explorer.Blog.Tests.Integration
 
         private static BlogController CreateController(IServiceScope scope)
         {
-            return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>());
+            return new BlogController(scope.ServiceProvider.GetRequiredService<IBlogService>(),
+                                      scope.ServiceProvider.GetRequiredService<IAchievementService>(),
+                                      scope.ServiceProvider.GetRequiredService<INotificationService>());
         }
 
         [Fact]

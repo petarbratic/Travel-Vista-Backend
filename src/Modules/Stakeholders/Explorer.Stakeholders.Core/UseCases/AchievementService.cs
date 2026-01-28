@@ -14,11 +14,13 @@ namespace Explorer.Stakeholders.Core.UseCases
     public class AchievementService : IAchievementService
     {
         private readonly IAchievementRepository _achievementRepository;
+        private readonly IXpEventRepository _xpEventRepository;
         private readonly IMapper _mapper;
 
-        public AchievementService(IAchievementRepository achievementRepository, IMapper mapper)
+        public AchievementService(IAchievementRepository achievementRepository, IXpEventRepository xpEventRepository, IMapper mapper)
         {
             _achievementRepository = achievementRepository;
+            _xpEventRepository = xpEventRepository;
             _mapper = mapper;
         }
 
@@ -49,6 +51,20 @@ namespace Explorer.Stakeholders.Core.UseCases
             return dto;
         }
 
+        public string BlogCreated(long touristId)
+        {
+            // Event type: jedan dogadjaj kad se uclani u klub
+            var blogCreatedCount = _xpEventRepository.CountByType(touristId, Domain.XpEventType.FirstBlogCreated);
+
+            // Ako se nije uclanio nijednom, nista
+            if (blogCreatedCount < 1)
+                return "";
+
+            // Otkljucaj jednom
+            //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
+            return AchievementCode.FirstBlogCreated.ToString();
+        }
+
         private static (string Name, string Description) GetMeta(AchievementCode code)
         {
             return code switch
@@ -65,13 +81,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                 AchievementCode.FirstClubJoined =>
                     ("First Club Joined", "You have joined your first club."),
 
-                AchievementCode.FiveClubsJoined =>
-                    ("Five Clubs Joined", "You have joined 5 clubs."),
-
-                AchievementCode.TenClubsJoined =>
-                    ("Ten Clubs Joined", "You have joined 10 clubs."),
-
-                AchievementCode.FirstReviewWritten =>
+               AchievementCode.FirstReviewWritten =>
                     ("First Review Written", "You have written your first review."),
 
                 AchievementCode.FiveReviewsWritten =>
@@ -79,14 +89,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
                 AchievementCode.TenReviewsWritten =>
                     ("Ten Reviews Written", "You have written 10 reviews."),
-                AchievementCode.FirstTourReviewWritten =>
-                    ("First Tour Review Written", "You have written your first tour review."),
-
-                AchievementCode.FiveTourReviewsWritten =>
-                    ("Five Tour Reviews Written", "You have written 5 tour reviews."),
-
-                AchievementCode.TenTourReviewsWritten =>
-                    ("Ten Tour Reviews Written", "You have written 10 tour reviews."),
+               
 
                 AchievementCode.FirstTourBought =>
                     ("First Tour Purchased", "You have purchased your first tour."),
@@ -100,6 +103,17 @@ namespace Explorer.Stakeholders.Core.UseCases
                 _ =>
                     ("Achievement Unlocked", "You have unlocked a new achievement.")
             };
+        }
+        public List<AchievementDto> GetForTourist(long touristId)
+        {
+            if (touristId == 0)
+                throw new ArgumentException("Invalid tourist id.");
+
+            var achievements = _achievementRepository.GetByTouristId(touristId);
+
+            return achievements
+                .Select(a => _mapper.Map<AchievementDto>(a))
+                .ToList();
         }
     }
 }

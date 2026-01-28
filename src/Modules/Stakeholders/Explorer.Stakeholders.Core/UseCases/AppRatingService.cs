@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using Explorer.BuildingBlocks.Core.UseCases;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -11,9 +13,10 @@ namespace Explorer.Stakeholders.Core.UseCases
     {
         private readonly IAppRatingRepository _repository;
         private readonly IUserRepository _userRepository;
-        private readonly IPersonRepository _personRepository; // DODATO
+        private readonly IPersonRepository _personRepository;
         private readonly ITouristRepository _touristRepository;
         private readonly IFirstTimeXpService _firstTimeXpService;
+        private readonly IInternalNotificationService _notificationService;
         private readonly IMapper _mapper;
 
         public AppRatingService(
@@ -22,6 +25,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             IPersonRepository personRepository,
             ITouristRepository touristRepository,
             IFirstTimeXpService firstTimeXpService,
+            IInternalNotificationService notificationService,
             IMapper mapper)
         {
             _repository = repository;
@@ -29,6 +33,7 @@ namespace Explorer.Stakeholders.Core.UseCases
             _personRepository = personRepository;
             _touristRepository = touristRepository;
             _firstTimeXpService = firstTimeXpService;
+            _notificationService = notificationService;
             _mapper = mapper;
         }
 
@@ -49,7 +54,10 @@ namespace Explorer.Stakeholders.Core.UseCases
                     var tourist = _touristRepository.GetByPersonId(person.Id);
                     if (tourist != null)
                     {
-                        _firstTimeXpService.TryAwardFirstAppReview(tourist.Id, rating.Id); // ← rating.Id je unique!
+                        _firstTimeXpService.TryAwardFirstAppReview(tourist.Id, rating.Id); // rating.Id je unique!
+
+                        _notificationService.CreateAchievementNotification(tourist.Id, "AppReviewAchievement");
+
                     }
                 }
             }
