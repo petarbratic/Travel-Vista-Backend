@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
@@ -92,7 +92,36 @@ public class TourService : ITourService, IInternalTourService
     public List<TourDto> GetByAuthorId(long authorId)
     {
         var tours = _tourRepository.GetByAuthorId(authorId);
-        return tours.Select(_mapper.Map<TourDto>).ToList();
+        var tourIds = tours.Select(t => t.Id).ToList();
+        var activeSales = _saleRepository.GetActiveSalesForTours(tourIds);
+        
+        var result = tours.Select(t =>
+        {
+            var dto = _mapper.Map<TourDto>(t);
+            // Ako postoji aktivni sale za turu, izračunaj sniženu cenu
+            var sale = activeSales.FirstOrDefault(s => s.TourIds.Contains(t.Id));
+            if (sale != null)
+            {
+                var discountedPrice = GetDiscountedPrice(t.Id, t.Price);
+                dto.OnSale = true;
+                dto.OriginalPrice = t.Price;
+                dto.DiscountPercentage = sale.DiscountPercentage;
+                dto.DiscountedPrice = discountedPrice;
+                // Set Price to discounted price for display consistency - MUST be after DiscountedPrice assignment
+                dto.Price = discountedPrice;
+            }
+            else
+            {
+                dto.OnSale = false;
+                dto.OriginalPrice = t.Price;
+                dto.DiscountedPrice = null;
+                dto.DiscountPercentage = null;
+                // Price stays as original price when no sale
+            }
+            return dto;
+        }).ToList();
+        
+        return result;
     }
 
     public TourDto Publish(long id, long authorId)

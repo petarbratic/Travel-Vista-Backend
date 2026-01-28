@@ -5,4 +5,5 @@ public class CouponValidationDto
     public string Code { get; set; }
     public long TourId { get; set; }
     public List<long>? TourIds { get; set; } // Lista tour ID-jeva iz korpe (opciono)
+    public Dictionary<long, decimal>? TourPrices { get; set; } // Cene tura iz korpe (tourId -> price) - opciono
 }

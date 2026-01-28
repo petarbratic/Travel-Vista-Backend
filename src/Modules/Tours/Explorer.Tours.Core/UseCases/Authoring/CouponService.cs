@@ -2,6 +2,7 @@ using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Public.Authoring;
+using Explorer.Tours.API.Internal;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using System.Linq;
@@ -12,13 +13,15 @@ public class CouponService : ICouponService
 {
     private readonly ICouponRepository _couponRepository;
     private readonly ITourRepository _tourRepository;
+    private readonly IInternalTourService _internalTourService;
     private readonly IMapper _mapper;
     private const string Characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
-    public CouponService(ICouponRepository couponRepository, ITourRepository tourRepository, IMapper mapper)
+    public CouponService(ICouponRepository couponRepository, ITourRepository tourRepository, IInternalTourService internalTourService, IMapper mapper)
     {
         _couponRepository = couponRepository;
         _tourRepository = tourRepository;
+        _internalTourService = internalTourService;
         _mapper = mapper;
     }
 
@@ -154,20 +157,27 @@ public class CouponService : ICouponService
                 ? "Coupon has expired." 
                 : "This coupon is not valid for this tour.";
 
+            // Get discounted price for display
+            var discountedPrice = _internalTourService.GetDiscountedPrice(tourId, tour.Price);
+
             return new CouponValidationResultDto
             {
                 IsValid = false,
                 Message = message,
                 DiscountPercentage = 0,
                 DiscountAmount = 0,
-                OriginalPrice = tour.Price,
-                FinalPrice = tour.Price,
+                OriginalPrice = discountedPrice,
+                FinalPrice = discountedPrice,
                 AppliedToTourId = null
             };
         }
 
-        var discountAmount = coupon.CalculateDiscount(tour.Price);
-        var finalPrice = tour.Price - discountAmount;
+        // Get discounted price (applies sale discounts first)
+        var tourDiscountedPrice = _internalTourService.GetDiscountedPrice(tourId, tour.Price);
+        
+        // Apply coupon discount to the already discounted price
+        var discountAmount = coupon.CalculateDiscount(tourDiscountedPrice);
+        var finalPrice = tourDiscountedPrice - discountAmount;
 
         return new CouponValidationResultDto
         {
@@ -175,13 +185,13 @@ public class CouponService : ICouponService
             Message = "Coupon is valid.",
             DiscountPercentage = coupon.DiscountPercentage,
             DiscountAmount = discountAmount,
-            OriginalPrice = tour.Price,
+            OriginalPrice = tourDiscountedPrice,
             FinalPrice = finalPrice,
             AppliedToTourId = tourId
         };
     }
 
-    public CouponValidationResultDto ValidateCouponForCart(string code, List<long> tourIds)
+    public CouponValidationResultDto ValidateCouponForCart(string code, List<long> tourIds, Dictionary<long, decimal>? tourPrices = null)
     {
         if (string.IsNullOrWhiteSpace(code))
         {
@@ -244,8 +254,64 @@ public class CouponService : ICouponService
                 };
             }
 
-            // Validiraj za tu turu
-            return ValidateCoupon(code, targetTourId);
+            // Koristi cenu iz korpe ako je dostupna, inače koristi GetDiscountedPrice
+            var tour = _tourRepository.GetById(targetTourId);
+            if (tour == null)
+            {
+                return new CouponValidationResultDto
+                {
+                    IsValid = false,
+                    Message = "Tour not found.",
+                    DiscountPercentage = 0,
+                    DiscountAmount = 0,
+                    OriginalPrice = 0,
+                    FinalPrice = 0,
+                    AppliedToTourId = null
+                };
+            }
+
+            decimal tourPrice;
+            if (tourPrices != null && tourPrices.ContainsKey(targetTourId))
+            {
+                tourPrice = tourPrices[targetTourId];
+            }
+            else
+            {
+                tourPrice = _internalTourService.GetDiscountedPrice(targetTourId, tour.Price);
+            }
+
+            if (!coupon.IsValidForTour(targetTourId, tour.AuthorId))
+            {
+                string message = !coupon.IsValid() 
+                    ? "Coupon has expired." 
+                    : "This coupon is not valid for this tour.";
+
+                return new CouponValidationResultDto
+                {
+                    IsValid = false,
+                    Message = message,
+                    DiscountPercentage = 0,
+                    DiscountAmount = 0,
+                    OriginalPrice = tourPrice,
+                    FinalPrice = tourPrice,
+                    AppliedToTourId = null
+                };
+            }
+
+            // Apply coupon discount to the price from cart (already discounted)
+            var couponDiscountAmount = coupon.CalculateDiscount(tourPrice);
+            var couponFinalPrice = tourPrice - couponDiscountAmount;
+
+            return new CouponValidationResultDto
+            {
+                IsValid = true,
+                Message = "Coupon is valid.",
+                DiscountPercentage = coupon.DiscountPercentage,
+                DiscountAmount = couponDiscountAmount,
+                OriginalPrice = tourPrice,
+                FinalPrice = couponFinalPrice,
+                AppliedToTourId = targetTourId
+            };
         }
 
         // Ako je kupon za sve ture autora, pronađi najskuplji proizvod od tog autora
@@ -283,8 +349,18 @@ public class CouponService : ICouponService
             };
         }
 
-        // Pronađi najskuplji proizvod od autora
-        var mostExpensiveTour = authorTours.OrderByDescending(t => t.Price).First();
+        // Pronađi najskuplji proizvod od autora (koristi cenu iz korpe ako je dostupna)
+        var toursWithPrices = authorTours.Select(t => new
+        {
+            Tour = t,
+            Price = tourPrices != null && tourPrices.ContainsKey(t.Id) 
+                ? tourPrices[t.Id] 
+                : _internalTourService.GetDiscountedPrice(t.Id, t.Price)
+        }).OrderByDescending(x => x.Price).ToList();
+
+        var mostExpensiveTourData = toursWithPrices.First();
+        var mostExpensiveTour = mostExpensiveTourData.Tour;
+        var mostExpensiveTourPrice = mostExpensiveTourData.Price;
 
         if (!coupon.IsValidForTour(mostExpensiveTour.Id, mostExpensiveTour.AuthorId))
         {
@@ -298,14 +374,15 @@ public class CouponService : ICouponService
                 Message = message,
                 DiscountPercentage = 0,
                 DiscountAmount = 0,
-                OriginalPrice = mostExpensiveTour.Price,
-                FinalPrice = mostExpensiveTour.Price,
+                OriginalPrice = mostExpensiveTourPrice,
+                FinalPrice = mostExpensiveTourPrice,
                 AppliedToTourId = null
             };
         }
 
-        var discountAmount = coupon.CalculateDiscount(mostExpensiveTour.Price);
-        var finalPrice = mostExpensiveTour.Price - discountAmount;
+        // Apply coupon discount to the price from cart (already discounted)
+        var discountAmount = coupon.CalculateDiscount(mostExpensiveTourPrice);
+        var finalPrice = mostExpensiveTourPrice - discountAmount;
 
         return new CouponValidationResultDto
         {
@@ -313,7 +390,7 @@ public class CouponService : ICouponService
             Message = "Coupon is valid.",
             DiscountPercentage = coupon.DiscountPercentage,
             DiscountAmount = discountAmount,
-            OriginalPrice = mostExpensiveTour.Price,
+            OriginalPrice = mostExpensiveTourPrice,
             FinalPrice = finalPrice,
             AppliedToTourId = mostExpensiveTour.Id
         };

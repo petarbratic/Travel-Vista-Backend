@@ -20,10 +20,10 @@ public class CouponController : ControllerBase
     [HttpPost("validate")]
     public ActionResult<CouponValidationResultDto> ValidateCoupon([FromBody] CouponValidationDto dto)
     {
-        // Ako ima TourIds, validiraj za celu korpu
-        if (dto.TourIds != null && dto.TourIds.Count > 0)
+        // Ako ima TourIds (čak i ako je prazna lista), validiraj za celu korpu
+        if (dto.TourIds != null)
         {
-            var result = _couponService.ValidateCouponForCart(dto.Code, dto.TourIds);
+            var result = _couponService.ValidateCouponForCart(dto.Code, dto.TourIds, dto.TourPrices);
             return Ok(result);
         }
         
