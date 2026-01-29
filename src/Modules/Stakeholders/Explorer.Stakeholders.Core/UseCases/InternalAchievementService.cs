@@ -1,4 +1,5 @@
 ﻿using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 using System;
@@ -12,11 +13,13 @@ namespace Explorer.Stakeholders.Core.UseCases
     public class InternalAchievementService : IInternalAchievementService
     {
         private readonly IAchievementRepository _achievementRepository;
+        private readonly IAchievementService _achievementService;
         private readonly IXpEventRepository _xpEventRepository;
 
-        public InternalAchievementService(IAchievementRepository achievementRepository, IXpEventRepository xpEventRepository)
+        public InternalAchievementService(IAchievementRepository achievementRepository, IAchievementService achievementService, IXpEventRepository xpEventRepository)
         {
             _achievementRepository = achievementRepository;
+            _achievementService = achievementService;
             _xpEventRepository = xpEventRepository;
         }
 
@@ -41,7 +44,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             if (!newlyUnlocked.Any()) return "";
 
-            return string.Join(", ", newlyUnlocked.Select(c => c.ToString()));
+            return string.Join(", ", newlyUnlocked.Select(c => Pretty(c)));
         }
 
         public string CompletedTours(long touristId)
@@ -64,7 +67,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             if (!newlyUnlocked.Any()) return "";
 
-            return string.Join(", ", newlyUnlocked.Select(c => c.ToString()));
+            return string.Join(", ", newlyUnlocked.Select(c => Pretty(c)));
         }
         public string ClubsJoined(long touristId)
         {
@@ -77,7 +80,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             // Otkljucaj jednom
             //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
-            return AchievementCode.FirstClubJoined.ToString();
+            return Pretty(AchievementCode.FirstClubJoined);
         }
         public string TourReviewsWritten(long touristId)
         {
@@ -99,7 +102,7 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             if (!newlyUnlocked.Any()) return "";
 
-            return string.Join(", ", newlyUnlocked.Select(c => c.ToString()));
+            return string.Join(", ", newlyUnlocked.Select(c => Pretty(c)));
         }
 
         public string ProfilePictureChanged(long touristId)
@@ -113,9 +116,13 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             // Otkljucaj jednom
             //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
-            return AchievementCode.FirstProfilePictureSet.ToString();
+            return Pretty(AchievementCode.FirstProfilePictureSet);
         }
-        
+        private string Pretty(AchievementCode code)
+        {
+            // koristi postojecu logiku
+            return _achievementService.GetMeta(code.ToString()).Name;
+        }
 
     }
 }
