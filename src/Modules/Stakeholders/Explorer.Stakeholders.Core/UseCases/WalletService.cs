@@ -1,4 +1,4 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
@@ -143,6 +143,33 @@ namespace Explorer.Stakeholders.Core.UseCases
             _txRepo.Create(new WalletTransaction(
                 personId: personId,
                 amountAc: -amountAc,
+                type: domainType,
+                description: description,
+                referenceType: referenceType,
+                referenceId: referenceId,
+                initiatorPersonId: initiatorPersonId
+            ));
+
+            return new WalletDto { PersonId = personId, BalanceAc = wallet.BalanceAc };
+        }
+
+        public WalletDto Credit(long personId, int amountAc, int type,
+            string description, string? referenceType = null, long? referenceId = null, long? initiatorPersonId = null)
+        {
+            if (amountAc <= 0) throw new ArgumentException("Amount must be > 0.");
+            if (!Enum.IsDefined(typeof(WalletTransactionType), type))
+                throw new ArgumentException("Invalid transaction type.");
+
+            var wallet = _walletRepo.GetByPersonId(personId) ?? _walletRepo.Create(new Wallet(personId));
+
+            wallet.AddAc(amountAc);
+            _walletRepo.Update(wallet);
+
+            var domainType = (WalletTransactionType)type;
+
+            _txRepo.Create(new WalletTransaction(
+                personId: personId,
+                amountAc: amountAc,
                 type: domainType,
                 description: description,
                 referenceType: referenceType,
