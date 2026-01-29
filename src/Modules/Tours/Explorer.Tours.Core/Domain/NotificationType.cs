@@ -1,4 +1,4 @@
-﻿namespace Explorer.Tours.Core.Domain;
+namespace Explorer.Tours.Core.Domain;
 public enum NotificationType
 {
     NewMessage = 0,           // Nova poruka na problemu
@@ -9,5 +9,6 @@ public enum NotificationType
     TourPurchased = 5,
     BundlePurchase = 6,
     TourOnSale = 7,
-    Achievement = 8
+    Achievement = 8,
+    TourRewardAc = 9         // AC nagrada za završenu turu
 }

@@ -72,6 +72,7 @@ public static class ToursStartup
         services.AddScoped<IGroupTourSessionService, GroupTourSessionService>();
         services.AddScoped<IGroupTourExecutionService, GroupTourExecutionService>();
         services.AddScoped<IGroupTourSessionCleanup, GroupTourSessionCleanup>();
+        services.AddScoped<AcRewardsService>();
     }
 
     private static void SetupInfrastructure(IServiceCollection services)

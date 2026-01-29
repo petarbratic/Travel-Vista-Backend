@@ -33,6 +33,7 @@ public class TourExecutionService : ITourExecutionService
     private readonly IInternalXpEventService _xpEventService;
     private readonly IInternalNotificationService _notificationService;
     private readonly IInternalAchievementService _achievementService;
+    private readonly AcRewardsService _acRewardsService;
 
     private readonly IGroupTourSessionCleanup _groupTourSessionCleanup;
     private readonly ITourService _tourService;
@@ -57,6 +58,7 @@ public class TourExecutionService : ITourExecutionService
 
         IInternalNotificationService notificationService,
         IInternalAchievementService achievementService,
+        AcRewardsService acRewardsService,
 
         IGroupTourSessionCleanup groupTourSessionCleanup,
         ITourService tourService,
@@ -77,6 +79,7 @@ public class TourExecutionService : ITourExecutionService
 
         _notificationService = notificationService;
         _achievementService = achievementService;
+        _acRewardsService = acRewardsService;
 
         _xpEventService = xpEventService;
 
@@ -276,6 +279,29 @@ public class TourExecutionService : ITourExecutionService
 
         if(!String.Equals(message, ""))
             _notificationService.CreateAchievementNotification(touristId, message);
+
+        // AC Rewards System - izračunaj i dodeli nagrade
+        var completionTime = updated.CompletionTime ?? DateTime.UtcNow;
+        
+        var rewardResult = _acRewardsService.CalculateAndAwardRewards(
+            touristId: touristId,
+            tourId: tour.Id,
+            startTime: updated.StartTime,
+            completionTime: completionTime
+        );
+
+        // Pošalji notifikaciju o osvojenim AC nagradama samo ako je TotalAc > 0
+        if (rewardResult.TotalAc > 0)
+        {
+            _notificationService.CreateTourRewardAcNotification(
+                recipientId: touristId,
+                totalAc: rewardResult.TotalAc,
+                baseReward: rewardResult.BaseReward,
+                fastCompletionBonus: rewardResult.FastCompletionBonus,
+                streakBonus: rewardResult.StreakBonus,
+                tourName: tour.Name
+            ).Wait();
+        }
 
         return _mapper.Map<TourExecutionDto>(updated);
     }
