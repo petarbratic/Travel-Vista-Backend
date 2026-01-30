@@ -32,6 +32,18 @@ namespace Explorer.Payments.Tests.Integration.Shopping
             }
         }
 
+        // Helper za čišćenje tokena
+        private void ClearTokens(IServiceScope scope, long touristId)
+        {
+            var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+            var tokens = db.TourPurchaseTokens.Where(t => t.TouristId == touristId).ToList();
+            if (tokens.Any())
+            {
+                db.TourPurchaseTokens.RemoveRange(tokens);
+                db.SaveChanges();
+            }
+        }
+
         [Fact]
         public void Checkout_creates_tokens_and_empties_cart()
         {
@@ -41,8 +53,9 @@ namespace Explorer.Payments.Tests.Integration.Shopping
 
             using var scope = Factory.Services.CreateScope();
 
-            // Očisti korpu pre testa
+            // Očisti korpu i tokene pre testa
             ClearCart(scope, touristId);
+            ClearTokens(scope, touristId);
 
             var cartController = new ShoppingCartController(
                 scope.ServiceProvider.GetRequiredService<IShoppingCartService>())
@@ -73,10 +86,14 @@ namespace Explorer.Payments.Tests.Integration.Shopping
             result.Tokens[0].TourId.ShouldBe(tourId);
             result.Tokens[0].TouristId.ShouldBe(touristId);
 
+            // Proveri da token postoji u bazi sa istim tourId i touristId
             var stored = db.TourPurchaseTokens
                             .FirstOrDefault(t => t.TouristId == touristId && t.TourId == tourId);
             stored.ShouldNotBeNull();
+            
+            // Token GUID se generiše random, pa samo proveravamo da postoji i da se poklapa
             stored.Token.ShouldBe(result.Tokens[0].Token);
+            stored.Token.ShouldNotBeNullOrEmpty();
 
             var storedCart = db.ShoppingCarts.First(c => c.TouristId == touristId);
             storedCart.Items.Count.ShouldBe(0);
@@ -93,8 +110,9 @@ namespace Explorer.Payments.Tests.Integration.Shopping
 
             using var scope = Factory.Services.CreateScope();
 
-            // Očisti korpu pre testa
+            // Očisti korpu i tokene pre testa
             ClearCart(scope, touristId);
+            ClearTokens(scope, touristId);
 
             var cart = new ShoppingCartController(
                 scope.ServiceProvider.GetRequiredService<IShoppingCartService>())

@@ -108,27 +108,6 @@ public class EncounterActivationTests : BaseEncountersIntegrationTest
         ).Message.ShouldContain("already completed");
     }
 
-    /*
-    [Fact]
-    public void CompleteEncounter_Success()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var activationService = scope.ServiceProvider.GetRequiredService<IEncounterActivationService>();
-
-        // Aktivacija -5: Tourist -23, Encounter -3 (Social), Status InProgress
-        long touristId = -23;
-        long encounterId = -3;
-
-        // Act
-        var result = activationService.CompleteEncounter(touristId, encounterId);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Status.ShouldBe("Completed");
-        result.CompletedAt.ShouldNotBeNull();
-    }*/
-
     [Fact]
     public void CompleteEncounter_Fails_WhenNotActive()
     {
@@ -165,26 +144,6 @@ public class EncounterActivationTests : BaseEncountersIntegrationTest
         result.Status.ShouldBe("Failed");
         result.CompletedAt.ShouldNotBeNull();
     }
-
-    /*
-    [Fact]
-    public void GetActiveEncounters_ReturnsOnlyInProgress()
-    {
-        // Arrange
-        using var scope = Factory.Services.CreateScope();
-        var activationService = scope.ServiceProvider.GetRequiredService<IEncounterActivationService>();
-
-        // Tourist -21 ima 2 InProgress: -2 (Encounter -2) i -6 (Encounter -4)
-        long touristId = -21;
-
-        // Act
-        var result = activationService.GetActiveEncounters(touristId);
-
-        // Assert
-        result.ShouldNotBeNull();
-        result.Count.ShouldBeGreaterThanOrEqualTo(2);
-        result.ShouldAllBe(a => a.Status == "InProgress");
-    }*/
 
     [Fact]
     public void GetNearbyEncounters_Fails_WhenPositionNotSet()

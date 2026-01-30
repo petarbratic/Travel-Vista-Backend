@@ -28,6 +28,18 @@ public class TourPurchaseTokenQueryTests : BasePaymentsIntegrationTest
         }
     }
 
+    // Helper za čišćenje tokena
+    private void ClearTokens(IServiceScope scope, long touristId)
+    {
+        var db = scope.ServiceProvider.GetRequiredService<PaymentsContext>();
+        var tokens = db.TourPurchaseTokens.Where(t => t.TouristId == touristId).ToList();
+        if (tokens.Any())
+        {
+            db.TourPurchaseTokens.RemoveRange(tokens);
+            db.SaveChanges();
+        }
+    }
+
     [Fact]
     public void GetTokens_returns_all_for_tourist()
     {
@@ -38,8 +50,9 @@ public class TourPurchaseTokenQueryTests : BasePaymentsIntegrationTest
 
         using var scope = Factory.Services.CreateScope();
 
-        // Očisti korpu pre testa
+        // Očisti korpu i tokene pre testa
         ClearCart(scope, personIdLong);
+        ClearTokens(scope, personIdLong);
 
         var cart = CreateCartController(scope, personId);
         var purchase = CreatePurchaseController(scope, personId);

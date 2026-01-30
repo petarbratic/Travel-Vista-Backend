@@ -110,6 +110,10 @@ public class EncounterService : IEncounterService
 
     public void Delete(long id)
     {
+        var encounter = _encounterRepository.GetById(id);
+        if (encounter == null)
+            throw new KeyNotFoundException($"Encounter with id {id} not found.");
+            
         _encounterRepository.Delete(id);
     }
 
