@@ -21,7 +21,6 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.ConfigureSwagger(builder.Configuration);
 builder.Services.AddSignalR();
-
 // 🔥 DODATO: EKSPLICITNI CORS ZA SIGNALR
 builder.Services.AddCors(options =>
 {
@@ -31,7 +30,7 @@ builder.Services.AddCors(options =>
             .WithOrigins("http://localhost:4200")
             .AllowAnyHeader()
             .AllowAnyMethod()
-            .AllowCredentials(); // 🔥 OBAVEZNO ZA SIGNALR
+            .AllowCredentials(); 
     });
 });
 

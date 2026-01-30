@@ -27,12 +27,14 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         var controller = CreateController(scope, "-21");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>(); // 👈
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
 
         CleanupActiveSessions(dbContext, -21);
 
         var tourId = CreateAndPublishTour(scope);
 
         shoppingCart.AddToCart(-21, tourId); // ✅ KLJUČNO
+        tokenService.Checkout(-21);
 
         controller.StartTour(new TourExecutionCreateDto
         {
@@ -63,11 +65,13 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         var controller = CreateController(scope, "-22");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>(); // 👈
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
 
         CleanupActiveSessions(dbContext, -22);
 
         var tourId = CreateAndPublishTour(scope);
         shoppingCart.AddToCart(-22, tourId); // ✅
+        tokenService.Checkout(-22);
 
         controller.StartTour(new TourExecutionCreateDto
         {
@@ -96,11 +100,13 @@ public class TourExecutionLocationCheckTests : BaseToursIntegrationTest
         var controller = CreateController(scope, "-23");
         var dbContext = scope.ServiceProvider.GetRequiredService<ToursContext>();
         var shoppingCart = scope.ServiceProvider.GetRequiredService<IShoppingCartService>(); // 👈
+        var tokenService = scope.ServiceProvider.GetRequiredService<ITourPurchaseTokenService>();
 
         CleanupActiveSessions(dbContext, -23);
 
         var tourId = CreateAndPublishTour(scope);
         shoppingCart.AddToCart(-23, tourId); // ✅
+        tokenService.Checkout(-23);
 
         controller.StartTour(new TourExecutionCreateDto
         {

@@ -11,4 +11,6 @@ DELETE FROM payments."TourPurchaseTokens";
 DELETE FROM tours."KeyPoints";
 DELETE FROM tours."TourExecutions";
 DELETE FROM tours."TourReviews";
+DELETE FROM tours."GroupTourSessions";
+DELETE FROM tours."GroupTourSessionParticipants";
 

@@ -1,4 +1,4 @@
-﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Dtos;
 
 namespace Explorer.Stakeholders.API.Public;
 
@@ -6,4 +6,5 @@ public interface IAuthenticationService
 {
     AuthenticationTokensDto Login(CredentialsDto credentials);
     AuthenticationTokensDto RegisterTourist(AccountRegistrationDto account);
+    Task<AuthenticationTokensDto> GoogleLoginAsync(GoogleLoginDto googleLogin);
 }

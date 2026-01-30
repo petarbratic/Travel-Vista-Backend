@@ -1,9 +1,10 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
 using Explorer.Tours.API.Public;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
+using System.Collections.Generic;
 
 namespace Explorer.Tours.Core.UseCases;
 
@@ -188,6 +189,49 @@ public class NotificationService : INotificationService, IInternalNotificationSe
         _notificationRepository.Create(notification);
         var notificationDto = _mapper.Map<NotificationDto>(notification);
         _ = _publisher.PublishAsync(notificationDto);
+    }
+    public void CreateAchievementNotification(long touristId, string message)
+    {
+        var notification = new Notification(
+            recipientId: touristId,
+            type: NotificationType.Achievement,
+            relatedEntityId: 1,
+            message: message
+        );
+
+        _notificationRepository.Create(notification);
+        var dto = _mapper.Map<NotificationDto>(notification);
+        _ = _publisher.PublishAsync(dto);
+    }
+
+    public async Task CreateTourRewardAcNotification(long recipientId, int totalAc, int baseReward, int fastCompletionBonus, int streakBonus, string tourName)
+    {
+        var parts = new List<string>();
+        parts.Add($"Base reward: +{baseReward} AC");
+        
+        if (fastCompletionBonus > 0)
+        {
+            parts.Add($"Fast completion bonus: +{fastCompletionBonus} AC");
+        }
+        
+        if (streakBonus > 0)
+        {
+            parts.Add($"Streak bonus: +{streakBonus} AC");
+        }
+
+        var message = $"You've earned {totalAc} AC for completed tour '{tourName}'! ({string.Join(", ", parts)})";
+
+        var notification = new Notification(
+            recipientId: recipientId,
+            type: NotificationType.TourRewardAc,
+            relatedEntityId: recipientId,
+            message: message
+        );
+
+        _notificationRepository.Create(notification);
+        var dto = _mapper.Map<NotificationDto>(notification);
+        
+        await _publisher.PublishAsync(dto);
     }
 
 }

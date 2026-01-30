@@ -10,5 +10,5 @@ public interface ICouponService
     CouponDto GetById(long id, long authorId);
     List<CouponDto> GetByAuthorId(long authorId);
     CouponValidationResultDto ValidateCoupon(string code, long tourId);
-    CouponValidationResultDto ValidateCouponForCart(string code, List<long> tourIds);
+    CouponValidationResultDto ValidateCouponForCart(string code, List<long> tourIds, Dictionary<long, decimal>? tourPrices = null);
 }

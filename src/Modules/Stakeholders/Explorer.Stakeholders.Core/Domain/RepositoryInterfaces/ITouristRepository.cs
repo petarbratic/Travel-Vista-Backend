@@ -13,4 +13,5 @@ public interface ITouristRepository
     Tourist GetByPersonId(long personId); // Vraća turistu po Tourist.PersonId
     Tourist Create(Tourist tourist);
     Tourist Update(Tourist tourist);
+    List<Tourist> GetAll();
 }

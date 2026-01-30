@@ -6,6 +6,7 @@ using Explorer.Tours.API.Public.Review;
 using Explorer.Tours.Core.Domain;
 using Explorer.Tours.Core.Domain.RepositoryInterfaces;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Tours.Core.UseCases.Review;
 
@@ -16,18 +17,24 @@ public class TourReviewService : ITourReviewService
     private readonly IMapper _mapper;
     private readonly ITourRepository _tourRepository;
     private readonly IInternalXpEventService _internalXpEventService;
+    private readonly IInternalAchievementService _achievementService;
+    private readonly IInternalNotificationService _notificationService;
 
     public TourReviewService(
     ITourReviewRepository reviewRepository,
     ITourExecutionRepository executionRepository,
     ITourRepository tourRepository,
     IInternalXpEventService internalXpEventService,
+    IInternalAchievementService achievementService,
+    IInternalNotificationService notificationService,
     IMapper mapper)
     {
         _reviewRepository = reviewRepository;
         _executionRepository = executionRepository;
         _tourRepository = tourRepository;
         _internalXpEventService = internalXpEventService;
+        _achievementService = achievementService;
+        _notificationService = notificationService;
         _mapper = mapper;
     }
 
@@ -100,6 +107,11 @@ public class TourReviewService : ITourReviewService
         var created = _reviewRepository.Create(review);
 
         _internalXpEventService.CreateTourReviewXp(touristId, created.TourId, 20);
+
+        string message = _achievementService.TourReviewsWritten(touristId);
+
+        if (!String.Equals(message, ""))
+            _notificationService.CreateAchievementNotification(touristId, message);
 
         return MapReviewToDto(created);
     }
