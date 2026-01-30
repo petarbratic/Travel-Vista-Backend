@@ -46,26 +46,48 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             // pošto DTO ima string Code + Name/Description, popuni ručno
             dto.Code = created.Code.ToString();
-            (dto.Name, dto.Description) = GetMeta(created.Code);
+            (dto.Name, dto.Description) = GetMeta(dto.Code);
 
             return dto;
         }
 
         public string BlogCreated(long touristId)
         {
-            // Event type: jedan dogadjaj kad se uclani u klub
-            var blogCreatedCount = _xpEventRepository.CountByType(touristId, Domain.XpEventType.FirstBlogCreated);
+            var blogCreatedCount = _xpEventRepository.CountByType(
+                touristId,
+                Domain.XpEventType.FirstBlogCreated
+            );
 
-            // Ako se nije uclanio nijednom, nista
+            // Ako se događaj nije desio
             if (blogCreatedCount < 1)
                 return "";
 
-            // Otkljucaj jednom
-            //_achievementRepository.Create(new Achievement(touristId, AchievementCode.FirstClubJoined));
-            return AchievementCode.FirstBlogCreated.ToString();
+            var code = AchievementCode.FirstBlogCreated;
+
+            // Ako je achievement već dodeljen
+            if (_achievementRepository.Has(touristId, code))
+                return "";
+
+            // Dodeli achievement
+            _achievementRepository.Create(new Achievement(touristId, code));
+
+            // Vrati NAME (string)
+            var meta = GetMetaInternal(code);
+            return meta.Name;
         }
 
-        private static (string Name, string Description) GetMeta(AchievementCode code)
+        public (string Name, string Description) GetMeta(string code)
+        {
+            if (string.IsNullOrWhiteSpace(code))
+                throw new ArgumentException("Code is required.");
+
+            if (!Enum.TryParse<AchievementCode>(code, out var achievementCode))
+                throw new ArgumentException($"Invalid AchievementCode: {code}");
+
+            return GetMetaInternal(achievementCode);
+        }
+
+        private (string Name, string Description) GetMetaInternal(AchievementCode code)
         {
             return code switch
             {
@@ -81,7 +103,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                 AchievementCode.FirstClubJoined =>
                     ("First Club Joined", "You have joined your first club."),
 
-               AchievementCode.FirstReviewWritten =>
+                AchievementCode.FirstReviewWritten =>
                     ("First Review Written", "You have written your first review."),
 
                 AchievementCode.FiveReviewsWritten =>
@@ -89,7 +111,6 @@ namespace Explorer.Stakeholders.Core.UseCases
 
                 AchievementCode.TenReviewsWritten =>
                     ("Ten Reviews Written", "You have written 10 reviews."),
-               
 
                 AchievementCode.FirstTourBought =>
                     ("First Tour Purchased", "You have purchased your first tour."),
@@ -99,6 +120,15 @@ namespace Explorer.Stakeholders.Core.UseCases
 
                 AchievementCode.TenTourBought =>
                     ("Ten Tours Purchased", "You have purchased 10 tours."),
+
+                AchievementCode.FirstProfilePictureSet =>
+                    ("Profile Picture Set", "You have set your profile picture."),
+
+                AchievementCode.FirstBlogCreated =>
+                    ("Blog Created", "You have created your first blog."),
+
+                AchievementCode.FirstAppReview =>
+                    ("App Reviewed", "You have reviewed the application."),
 
                 _ =>
                     ("Achievement Unlocked", "You have unlocked a new achievement.")
@@ -111,9 +141,13 @@ namespace Explorer.Stakeholders.Core.UseCases
 
             var achievements = _achievementRepository.GetByTouristId(touristId);
 
-            return achievements
-                .Select(a => _mapper.Map<AchievementDto>(a))
-                .ToList();
+            return achievements.Select(a =>
+            {
+                var dto = _mapper.Map<AchievementDto>(a);
+                dto.Code = a.Code.ToString();
+                (dto.Name, dto.Description) = GetMeta(dto.Code);
+                return dto;
+            }).ToList();
         }
     }
 }

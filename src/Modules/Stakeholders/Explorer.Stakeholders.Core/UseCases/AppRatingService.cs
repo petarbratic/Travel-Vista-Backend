@@ -56,7 +56,7 @@ namespace Explorer.Stakeholders.Core.UseCases
                     {
                         _firstTimeXpService.TryAwardFirstAppReview(tourist.Id, rating.Id); // rating.Id je unique!
 
-                        _notificationService.CreateAchievementNotification(tourist.Id, "AppReviewAchievement");
+                        _notificationService.CreateAchievementNotification(tourist.Id, "You have reviewed the application.");
 
                     }
                 }
