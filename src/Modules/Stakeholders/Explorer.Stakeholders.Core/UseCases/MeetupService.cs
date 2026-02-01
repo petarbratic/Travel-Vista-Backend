@@ -34,12 +34,6 @@ public class MeetupService : IMeetupService
         // Ako ne postoji tourist zapis, korisnik je verovatno Author - dozvoli pristup
         if (tourist == null)
             return;
-
-        // Ako postoji tourist zapis, proveri rank
-        if (tourist.Level < 2)
-        {
-            throw new ForbiddenException("Meetups are unlocked at Bronze rank (Level 2+). Keep exploring to level up!");
-        }
     }
 
     public List<MeetupDto> GetAll(long requesterId)
