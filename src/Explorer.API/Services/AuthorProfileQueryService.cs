@@ -37,6 +37,18 @@ namespace Explorer.API.Services
                 throw new KeyNotFoundException("Author not found.");
 
             var myTours = _tourRepository.GetByAuthorId(authorId);
+
+            // mapiranje tura (uvek)
+            var toursDto = myTours.Select(t => new AuthorTourDto
+            {
+                TourId = t.Id,
+                Name = t.Name,
+                Description = t.Description,          
+                Difficulty = t.Difficulty.ToString(), // prilagodi
+                Status = t.Status.ToString(),         // prilagodi
+                CreatedAt = t.CreatedAt               // ako postoji
+            }).ToList();
+
             var tourIds = myTours.Select(t => t.Id).ToList();
 
             if (!tourIds.Any())
@@ -44,11 +56,14 @@ namespace Explorer.API.Services
                 return new AuthorProfileStatsDto
                 {
                     AuthorId = authorId,
+                    AuthorName = person.Name,
+                    AuthorSurname = person.Surname,
                     TotalTours = 0,
                     TotalReviews = 0,
                     AverageRating = 0,
                     TotalPurchases = 0,
-                    RecentReviews = new()
+                    RecentReviews = new(),
+                    Tours = toursDto
                 };
             }
 
@@ -80,13 +95,17 @@ namespace Explorer.API.Services
             return new AuthorProfileStatsDto
             {
                 AuthorId = authorId,
+                AuthorName = person.Name,
+                AuthorSurname = person.Surname,
                 TotalTours = myTours.Count,
                 TotalReviews = totalReviews,
                 AverageRating = Math.Round(avgRating, 2),
                 TotalPurchases = totalPurchases,
-                RecentReviews = recent
+                RecentReviews = recent,
+                Tours = toursDto
             };
         }
+
 
         public List<AuthorTopListItemDto> GetTopAuthors(string sort, int take)
         {
