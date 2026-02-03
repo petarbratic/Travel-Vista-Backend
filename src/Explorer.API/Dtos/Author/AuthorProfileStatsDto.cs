@@ -7,6 +7,9 @@
         public int TotalReviews { get; set; }
         public double AverageRating { get; set; }
         public int TotalPurchases { get; set; }
+        public string AuthorName { get; set; } = "";
+        public string AuthorSurname { get; set; } = "";
         public List<RecentTourReviewDto> RecentReviews { get; set; } = new();
+        public List<AuthorTourDto> Tours { get; set; } = new();
     }
 }
