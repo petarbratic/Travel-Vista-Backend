@@ -11,5 +11,6 @@ namespace Explorer.Payments.Core.Domain.RepositoryInterfaces
         TourPurchaseToken Create(TourPurchaseToken token);
         IEnumerable<TourPurchaseToken> GetByTouristId(long touristId);
         TourPurchaseToken? Get(long id);
+        int CountByTourIds(IEnumerable<long> tourIds);
     }
 }

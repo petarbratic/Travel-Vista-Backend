@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using AutoMapper;
 using Explorer.BuildingBlocks.Core.Exceptions;
@@ -93,12 +94,21 @@ public class TouristTourService : ITouristTourService
             //
             // 3) StartPoint = ime prvog KeyPoint-a
             //
-            var tourWithKeyPoints = _tourRepository.GetByIdWithKeyPoints(tour.Id);
-            if (tourWithKeyPoints != null && tourWithKeyPoints.KeyPoints.Any())
+            try
             {
-                var first = tourWithKeyPoints.KeyPoints.OrderBy(k => k.Id).First();
-                dto.StartPoint = first.Name;
-                dto.FirstKeyPoint = _mapper.Map<KeyPointDto>(first);
+                var tourWithKeyPoints = _tourRepository.GetByIdWithKeyPoints(tour.Id);
+                if (tourWithKeyPoints != null && tourWithKeyPoints.KeyPoints != null && tourWithKeyPoints.KeyPoints.Any())
+                {
+                    var first = tourWithKeyPoints.KeyPoints.OrderBy(k => k.Id).First();
+                    dto.StartPoint = first.Name;
+                    dto.FirstKeyPoint = _mapper.Map<KeyPointDto>(first);
+                }
+            }
+            catch (Exception)
+            {
+                // Ako ne može da učita key points, ostavi prazno
+                dto.StartPoint = string.Empty;
+                dto.FirstKeyPoint = null;
             }
 
             //
@@ -176,6 +186,11 @@ public class TouristTourService : ITouristTourService
 
         // MAP IRRELEVANT FIELDS
         var preview = _mapper.Map<TourDetailsDto>(tour);
+
+        if (tour.Equipment != null)
+        {
+            preview.Equipment = tour.Equipment.Select(e => _mapper.Map<EquipmentDto>(e)).ToList();
+        }
 
         // LENGTH
         preview.Length = tour.DistanceInKm;
@@ -299,12 +314,21 @@ public class TouristTourService : ITouristTourService
                 dto.AverageDuration = 0;
 
             // START POINT
-            var tourWithKeyPoints = _tourRepository.GetByIdWithKeyPoints(tour.Id);
-            if (tourWithKeyPoints != null && tourWithKeyPoints.KeyPoints.Any())
+            try
             {
-                var first = tourWithKeyPoints.KeyPoints.OrderBy(k => k.Id).First();
-                dto.StartPoint = first.Name;
-                dto.FirstKeyPoint = _mapper.Map<KeyPointDto>(first);
+                var tourWithKeyPoints = _tourRepository.GetByIdWithKeyPoints(tour.Id);
+                if (tourWithKeyPoints != null && tourWithKeyPoints.KeyPoints != null && tourWithKeyPoints.KeyPoints.Any())
+                {
+                    var first = tourWithKeyPoints.KeyPoints.OrderBy(k => k.Id).First();
+                    dto.StartPoint = first.Name;
+                    dto.FirstKeyPoint = _mapper.Map<KeyPointDto>(first);
+                }
+            }
+            catch (Exception)
+            {
+                // Ako ne može da učita key points, ostavi prazno
+                dto.StartPoint = string.Empty;
+                dto.FirstKeyPoint = null;
             }
 
             // AVERAGE RATING

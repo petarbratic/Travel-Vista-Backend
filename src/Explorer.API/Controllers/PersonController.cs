@@ -1,4 +1,5 @@
 ﻿using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.UseCases;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,12 @@ namespace Explorer.API.Controllers;
 public class PersonController : ControllerBase
 {
     private readonly IPersonService _personService;
+    private readonly ITouristXPService _touristXpService;
 
-    public PersonController(IPersonService personService)
+    public PersonController(IPersonService personService, ITouristXPService touristXpService)
     {
         _personService = personService;
+        _touristXpService = touristXpService;
     }
 
     [HttpGet]
@@ -34,6 +37,51 @@ public class PersonController : ControllerBase
         catch (UnauthorizedAccessException ex)
         {
             return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An unexpected error occurred: " + ex.Message });
+        }
+    }
+
+    // za Level i Rank
+    [HttpGet("tourist-stats")]
+    [Authorize(Policy = "touristPolicy")] // Samo turisti
+    public ActionResult<TouristStatsDto> GetMyTouristStats()
+    {
+        try
+        {
+            var personId = GetPersonIdFromToken();
+            var stats = _touristXpService.GetStatsByPersonId(personId);
+            return Ok(stats);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Unauthorized(new { message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "An unexpected error occurred: " + ex.Message });
+        }
+    }
+
+    // GET: api/stakeholders/person/tourist-stats/{userId}
+    [HttpGet("tourist-stats/{userId:long}")]
+    [Authorize]
+    public ActionResult<TouristStatsDto> GetTouristStatsByUserId(long userId)
+    {
+        try
+        {
+            var stats = _touristXpService.GetStatsByPersonId(userId);
+            return Ok(stats);
+        }
+        catch (KeyNotFoundException ex)
+        {
+            return NotFound(new { message = ex.Message });
         }
         catch (Exception ex)
         {
@@ -71,7 +119,6 @@ public class PersonController : ControllerBase
 
     private long GetPersonIdFromToken()
     {
-
         var personIdClaim = HttpContext.User.Claims
             .FirstOrDefault(claim => claim.Type == "personId");
 
@@ -93,7 +140,7 @@ public class PersonController : ControllerBase
     }
 
     // POST: api/stakeholders/person
-    [Authorize(Policy = "administratorPolicy")] 
+    [Authorize(Policy = "administratorPolicy")]
     [HttpPost]
     public ActionResult<PersonDto> Create([FromBody] AccountRegistrationDto dto)
     {
@@ -109,7 +156,6 @@ public class PersonController : ControllerBase
         var result = _personService.GetAll(currentPersonId);
         return Ok(result);
     }
-
 
     // GET: api/stakeholders/person/{id}
     [Authorize(Policy = "administratorPolicy")]

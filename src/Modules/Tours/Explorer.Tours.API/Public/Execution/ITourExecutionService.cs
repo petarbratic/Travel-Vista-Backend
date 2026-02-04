@@ -19,4 +19,5 @@ public interface ITourExecutionService
     TourExecutionDto AbandonTour(long touristId);
     TourExecutionWithNextKeyPointDto? GetActiveWithNextKeyPoint(long touristId);
 
+    TourDto GetActiveTourByTouristId(long touristId);
 }

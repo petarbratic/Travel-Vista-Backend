@@ -15,7 +15,6 @@ namespace Explorer.Blog.Core.Domain.Blogs
         public DateTime? LastModifiedDate { get; private set; }
         public int AuthorId { get; private set; }
         public int Status { get; private set; }
-
         public List<BlogImage> Images { get; private set; }
         public List<Comment> Comments { get; private set; }
         public List<BlogRating> Ratings { get; private set; }

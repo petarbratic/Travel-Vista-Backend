@@ -1,4 +1,4 @@
-﻿using Explorer.Tours.Core.Domain;
+using Explorer.Tours.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using System.Text.Json;
@@ -31,6 +31,11 @@ public class ToursContext : DbContext
     public DbSet<Coupon> Coupons { get; set; }
 
     public DbSet<Sale> Sales { get; set; }
+
+    public DbSet<TourWishlist> TourWishlists { get; set; }
+
+    public DbSet<GroupTourSession> GroupTourSessions { get; set; }
+    public DbSet<GroupTourSessionParticipant> GroupTourSessionParticipants { get; set; }
 
     public ToursContext(DbContextOptions<ToursContext> options) : base(options) {}
 
@@ -322,5 +327,38 @@ public class ToursContext : DbContext
 
             entity.HasIndex(s => s.AuthorId);
         });
+
+        // TourWishlist configuration
+        modelBuilder.Entity<TourWishlist>(entity =>
+        {
+            entity.ToTable("TourWishlists", "tours");
+            entity.HasKey(w => w.Id);
+            entity.Property(w => w.Id).ValueGeneratedOnAdd();
+            entity.Property(w => w.TouristId).IsRequired();
+            entity.Property(w => w.TourId).IsRequired();
+            entity.Property(w => w.CreatedAt).IsRequired();
+
+            // Unique constraint: one tourist can have a tour in wishlist only once
+            entity.HasIndex(w => new { w.TouristId, w.TourId }).IsUnique();
+            entity.HasIndex(w => w.TouristId);
+        });
+        
+        modelBuilder.Entity<GroupTourSession>()
+            .HasMany(gts => gts.Participants)
+            .WithOne()
+            .HasForeignKey(p => p.SessionId)
+            .OnDelete(DeleteBehavior.Cascade);
+
+        // Position configuration
+        modelBuilder.Entity<Position>(entity =>
+        {
+            entity.ToTable("Positions", "tours");
+            entity.HasKey(p => p.Id);
+            entity.Property(p => p.Id).ValueGeneratedOnAdd();
+            entity.Property(p => p.TouristId).IsRequired();
+            entity.Property(p => p.Latitude).IsRequired();
+            entity.Property(p => p.Longitude).IsRequired();
+        });
+
     }
 }

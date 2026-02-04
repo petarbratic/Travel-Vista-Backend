@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Explorer.Stakeholders.API.Dtos;
+using Explorer.Stakeholders.API.Internal;
 using Explorer.Stakeholders.API.Public;
 using Explorer.Stakeholders.Core.Domain;
 using Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
+using Explorer.Tours.API.Internal;
 
 namespace Explorer.Stakeholders.Core.UseCases
 {
@@ -12,15 +14,25 @@ namespace Explorer.Stakeholders.Core.UseCases
         private readonly IClubRepository _clubRepository;
         private readonly IPersonRepository _personRepository;
         private readonly IMapper _mapper;
+        private readonly IFirstTimeXpService _firstTimeXpService;
+        private readonly IInternalAchievementService _achievementService;
+        private readonly IInternalNotificationService _notificationService;
 
-        public ClubJoinRequestService(IClubJoinRequestRepository requestRepository,
-                                      IClubRepository clubRepository,
-                                      IPersonRepository personRepository,
-                                      IMapper mapper)
+        public ClubJoinRequestService(
+            IClubJoinRequestRepository requestRepository,
+            IClubRepository clubRepository,
+            IPersonRepository personRepository,
+            IFirstTimeXpService firstTimeXpService,
+            IInternalAchievementService achievementService,
+            IInternalNotificationService notificationService,
+            IMapper mapper)
         {
             _requestRepository = requestRepository;
             _clubRepository = clubRepository;
             _personRepository = personRepository;
+            _firstTimeXpService = firstTimeXpService;
+            _achievementService = achievementService;
+            _notificationService = notificationService;
             _mapper = mapper;
         }
 
@@ -72,6 +84,14 @@ namespace Explorer.Stakeholders.Core.UseCases
             {
                 club.AddMember(request.TouristId);
                 _clubRepository.Update(club);
+
+                
+                _firstTimeXpService.TryAwardFirstClubJoin(request.TouristId, club.Id);
+
+                string message = _achievementService.ClubsJoined(request.TouristId);
+
+                if (!String.Equals(message, ""))
+                    _notificationService.CreateAchievementNotification(request.TouristId, message);
             }
 
             _requestRepository.Delete(requestId);

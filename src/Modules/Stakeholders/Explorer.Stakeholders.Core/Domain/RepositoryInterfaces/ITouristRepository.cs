@@ -9,7 +9,9 @@ namespace Explorer.Stakeholders.Core.Domain.RepositoryInterfaces;
 
 public interface ITouristRepository
 {
-    Tourist Get(long personId);
+    Tourist Get(long touristId); // Vraća turistu po Tourist.Id
+    Tourist GetByPersonId(long personId); // Vraća turistu po Tourist.PersonId
     Tourist Create(Tourist tourist);
     Tourist Update(Tourist tourist);
+    List<Tourist> GetAll();
 }

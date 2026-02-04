@@ -1,4 +1,4 @@
-﻿using AutoMapper;
+using AutoMapper;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.Core.Domain;
 using Explorer.BuildingBlocks.Core.UseCases;
@@ -11,7 +11,14 @@ public class ToursProfile : Profile
     public ToursProfile()
     {
         CreateMap<EquipmentDto, Equipment>().ReverseMap();
-        CreateMap<TourDto, Tour>().ReverseMap();
+        // Tour -> TourDto mapping - Price will be set manually based on sale status
+        CreateMap<Tour, TourDto>()
+            .ForMember(dest => dest.Price, opt => opt.MapFrom(src => src.Price)) // Default to original price
+            .ForMember(dest => dest.OnSale, opt => opt.Ignore())
+            .ForMember(dest => dest.OriginalPrice, opt => opt.Ignore())
+            .ForMember(dest => dest.DiscountedPrice, opt => opt.Ignore())
+            .ForMember(dest => dest.DiscountPercentage, opt => opt.Ignore());
+        CreateMap<TourDto, Tour>();
 
         CreateMap<TourCreateDto, Tour>();
         CreateMap<TourUpdateDto, Tour>();
@@ -96,5 +103,11 @@ public class ToursProfile : Profile
         CreateMap<Sale, SaleDto>().ReverseMap();
         CreateMap<SaleCreateDto, Sale>();
         CreateMap<SaleUpdateDto, Sale>();
+
+        CreateMap<TourWishlist, TourWishlistDto>();
+
+        CreateMap<GroupTourSession, GroupTourSessionDto>().ReverseMap();
+        CreateMap<CreateGroupTourSessionDto, GroupTourSession>();
+        CreateMap<GroupTourSessionParticipant, GroupTourSessionParticipantDto>().ReverseMap();
     }
 }

@@ -1,10 +1,13 @@
-﻿
+
+using Explorer.Blog.Infrastructure.Database;
 using Explorer.BuildingBlocks.Tests;
+using Explorer.Encounters.Infrastructure.Database;
 using Explorer.Payments.API.Internal;
 using Explorer.Payments.Infrastructure;
 using Explorer.Payments.Infrastructure.Database;
 using Explorer.Stakeholders.API.Dtos;
 using Explorer.Stakeholders.API.Internal;
+using Explorer.Stakeholders.Infrastructure.Database;
 using Explorer.Tours.API.Dtos;
 using Explorer.Tours.API.Internal;
 using Explorer.Tours.Infrastructure.Database;
@@ -29,12 +32,21 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
             services.Remove(descriptor);
         services.AddDbContext<ToursContext>(SetupTestContext());
 
-        // Payments DB Context
-        var paymentsDescriptor = services.SingleOrDefault(d =>
-            d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
-        if (paymentsDescriptor != null)
-            services.Remove(paymentsDescriptor);
+        var paymentsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<PaymentsContext>));
+        services.Remove(paymentsDescriptor!);
         services.AddDbContext<PaymentsContext>(SetupTestContext());
+
+        var stakeholdersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<StakeholdersContext>));
+        services.Remove(stakeholdersDescriptor!);
+        services.AddDbContext<StakeholdersContext>(SetupTestContext());
+
+        var blogsDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<BlogContext>));
+        services.Remove(blogsDescriptor!);
+        services.AddDbContext<BlogContext>(SetupTestContext());
+
+        var encountersDescriptor = services.SingleOrDefault(d => d.ServiceType == typeof(DbContextOptions<EncountersContext>));
+        services.Remove(encountersDescriptor!);
+        services.AddDbContext<EncountersContext>(SetupTestContext());
 
         // ==================== MOCK: IInternalShoppingCartService ====================
         var existingShoppingCart = services.FirstOrDefault(d =>
@@ -84,14 +96,26 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
 
         var tourMock = new Mock<IInternalTourService>();
 
-        // Tour -2: OK
+        // Tour -2: OK - Published, Author -11
         tourMock.Setup(s => s.GetById(-2)).Returns(new TourDto
         {
             Id = -2,
             Name = "Test Tour -2",
             Price = 500m,
             Status = (int)TourStatusDto.Published,
-            ArchivedAt = null
+            ArchivedAt = null,
+            AuthorId = -11
+        });
+
+        // Tour -4: OK - Published, Author -11
+        tourMock.Setup(s => s.GetById(-4)).Returns(new TourDto
+        {
+            Id = -4,
+            Name = "Test Tour Published 2",
+            Price = 700m,
+            Status = (int)TourStatusDto.Published,
+            ArchivedAt = null,
+            AuthorId = -11
         });
 
         // Tour -3: Archived
@@ -101,7 +125,8 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
             Name = "Archived Tour",
             Price = 300m,
             Status = (int)TourStatusDto.Published,
-            ArchivedAt = DateTime.UtcNow.AddDays(-10)
+            ArchivedAt = DateTime.UtcNow.AddDays(-10),
+            AuthorId = -11
         });
 
         // Tour -1: Draft
@@ -111,11 +136,12 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
             Name = "Draft Tour",
             Price = 200m,
             Status = (int)TourStatusDto.Draft,
-            ArchivedAt = null
+            ArchivedAt = null,
+            AuthorId = -11
         });
 
         // Nepoznati negativni ID-evi: null
-        tourMock.Setup(s => s.GetById(It.Is<long>(id => id < 0 && id != -2 && id != -3 && id != -1)))
+        tourMock.Setup(s => s.GetById(It.Is<long>(id => id < 0 && id != -2 && id != -3 && id != -1 && id != -4)))
             .Returns((TourDto)null);
 
         // Pozitivni ID-evi: dinamički kreirani
@@ -126,10 +152,24 @@ public class ToursTestFactory : BaseTestFactory<ToursContext>
                 Name = $"Test Tour {tourId}",
                 Price = 500m,
                 Status = (int)TourStatusDto.Published,
-                ArchivedAt = null
+                ArchivedAt = null,
+                AuthorId = -11
             });
 
+        // GetDiscountedPrice vraća originalnu cenu (nema sale popusta u testovima)
+        tourMock.Setup(s => s.GetDiscountedPrice(It.IsAny<long>(), It.IsAny<decimal>()))
+            .Returns<long, decimal>((tourId, originalPrice) => originalPrice);
+
         services.AddScoped<IInternalTourService>(_ => tourMock.Object);
+
+        // ==================== MOCK: IInternalXpEventService ====================
+        var existingXp = services.FirstOrDefault(d => d.ServiceType == typeof(IInternalXpEventService));
+        if (existingXp != null) services.Remove(existingXp);
+
+        var xpMock = new Mock<IInternalXpEventService>();
+        xpMock.Setup(x => x.CreateTourReviewXp(It.IsAny<long>(), It.IsAny<long>(), It.IsAny<int>()));
+
+        services.AddScoped<IInternalXpEventService>(_ => xpMock.Object);
 
         return services;
     }
