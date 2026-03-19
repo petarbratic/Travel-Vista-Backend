@@ -5,7 +5,7 @@
 
 ---
 
-### Table of Contents
+## Table of Contents
 
 - [Description](#description)
 - [Technologies](#technologies)
@@ -27,7 +27,7 @@ Core experience highlights:
 
 ---
 
-#### Technologies
+## Technologies
 
 - **Frontend**: Angular 16 + Angular Material (UI role-based navigation)
 - **Mapping**: Leaflet + routing for the Tourist Map experience
